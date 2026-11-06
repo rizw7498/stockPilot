@@ -75,18 +75,18 @@ export default function Warehouses() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Warehouses & Depots
             </h1>
-            <span className="mono-chip text-[11px] text-blue-400">
+            <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
               {warehouses.length} Locations
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Manage multi-site storage facilities, fulfillment depots, and default dispatch hubs.
           </p>
         </div>

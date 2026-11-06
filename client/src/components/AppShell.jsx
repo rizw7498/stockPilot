@@ -47,7 +47,7 @@ export default function AppShell() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <Header onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto px-6 py-6 max-w-[1440px] w-full mx-auto">
+        <main className="flex-1 overflow-y-auto lg:overflow-hidden px-6 py-4 max-w-[1440px] w-full mx-auto flex flex-col min-h-0">
           <Outlet />
         </main>
       </div>

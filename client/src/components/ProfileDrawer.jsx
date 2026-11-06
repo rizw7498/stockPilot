@@ -41,12 +41,15 @@ export default function ProfileDrawer({ isOpen, onClose }) {
       subtitle="Operational identity, organization memberships, and preferences"
       footer={
         <div className="w-full flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 font-mono">
-            StockPilot v2.4
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-400" />
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+              StockPilot v2.4
+            </span>
+          </div>
           <Button
             variant="danger"
-            size="sm"
+            size="md"
             icon={LogOut}
             onClick={() => {
               onClose();
@@ -233,32 +236,6 @@ export default function ProfileDrawer({ isOpen, onClose }) {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Session Management & Logout Card */}
-        <div className="p-4 rounded-xl glass-3 border border-rose-500/20 bg-rose-500/[0.03] space-y-3">
-          <div>
-            <div className="text-xs font-semibold text-rose-300 flex items-center gap-2">
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              <span>Session Management</span>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Securely end your active operator session on this device.
-            </p>
-          </div>
-
-          <Button
-            variant="danger"
-            size="md"
-            icon={LogOut}
-            onClick={() => {
-              onClose();
-              logout();
-            }}
-            className="w-full"
-          >
-            Sign Out of Account
-          </Button>
         </div>
       </div>
     </Drawer>

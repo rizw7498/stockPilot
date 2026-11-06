@@ -257,7 +257,7 @@ export default function Sales() {
       key: 'warehouseId',
       header: 'Warehouse',
       render: (wh) => (
-        <span className="mono-chip text-slate-300">
+        <span className="mono-chip text-slate-600 dark:text-slate-300">
           {wh?.code || 'DEFAULT'}
         </span>
       ),
@@ -266,7 +266,7 @@ export default function Sales() {
       key: 'createdAt',
       header: 'Order Date',
       render: (date) => (
-        <span className="text-xs text-slate-400 font-mono">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
           {new Date(date).toLocaleDateString()}
         </span>
       ),
@@ -277,7 +277,7 @@ export default function Sales() {
       align: 'right',
       tabular: true,
       render: (minor) => (
-        <span className="font-semibold text-slate-100">
+        <span className="font-semibold text-slate-800 dark:text-slate-100 font-mono">
           {formatCurrency(minor)}
         </span>
       ),
@@ -329,19 +329,19 @@ export default function Sales() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Sales Orders
             </h1>
-            <span className="mono-chip text-[11px] text-blue-400">
+            <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
               {orders.length} Orders
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Manage customer sales orders, real-time stock reservations, and carrier shipments.
           </p>
         </div>
@@ -387,6 +387,7 @@ export default function Sales() {
         onRowClick={(row) => setViewingOrder(row)}
         emptyTitle="No sales orders found"
         emptyDescription="Create your first customer sales order to begin allocating inventory and dispatching goods."
+        className="flex-1"
       />
 
       {/* Create Sales Order Drawer (max-w-2xl) */}

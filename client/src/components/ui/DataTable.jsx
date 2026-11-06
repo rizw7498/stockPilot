@@ -34,14 +34,14 @@ export default function DataTable({
   const paginatedData = totalItems ? data : data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <div className={`relative flex flex-col glass-3 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs ${className}`}>
-      {/* Table Container */}
-      <div className="overflow-x-auto min-h-[220px]">
+    <div className={`relative flex flex-col flex-1 min-h-[380px] lg:min-h-0 glass-3 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs ${className}`}>
+      {/* Table Scrollable Container */}
+      <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/95 dark:bg-slate-900/60 backdrop-blur-md sticky top-0 z-10">
+          <thead className="sticky top-0 z-10">
+            <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/95 dark:bg-slate-900/80 backdrop-blur-md">
               {isSelectable && (
-                <th className="w-10 px-3 py-2.5">
+                <th className="w-12 px-4 py-2.5">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -66,7 +66,7 @@ export default function DataTable({
                     key={col.key}
                     style={col.width ? { width: col.width } : undefined}
                     onClick={() => col.sortable && onSort && onSort(col.key)}
-                    className={`px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 select-none ${alignClass} ${
+                    className={`px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 select-none ${alignClass} ${
                       col.sortable ? 'cursor-pointer hover:text-slate-900 dark:hover:text-slate-200' : ''
                     }`}
                   >
@@ -98,12 +98,12 @@ export default function DataTable({
 
           <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-[13px]">
             {loading ? (
-              <Skeleton variant="table-row" rows={pageSize > 6 ? 6 : pageSize} />
+              <Skeleton variant="table-row" rows={pageSize > 8 ? 8 : pageSize} />
             ) : paginatedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (isSelectable ? 1 : 0)}
-                  className="py-12 px-4 text-center"
+                  className="py-16 px-4 text-center"
                 >
                   <EmptyState title={emptyTitle} description={emptyDescription} />
                 </td>
@@ -122,7 +122,7 @@ export default function DataTable({
                   >
                     {isSelectable && (
                       <td
-                        className="w-10 px-3 py-2"
+                        className="w-12 px-4 py-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <input
@@ -149,7 +149,7 @@ export default function DataTable({
                       return (
                         <td
                           key={col.key}
-                          className={`px-3 py-2 text-slate-700 dark:text-slate-200 ${alignClass} ${
+                          className={`px-4 py-2 text-slate-700 dark:text-slate-200 ${alignClass} ${
                             col.tabular ? 'tabular-nums font-mono' : ''
                           }`}
                         >
@@ -166,7 +166,7 @@ export default function DataTable({
       </div>
 
       {/* Footer: Pagination & Item Count */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-slate-900/40 text-xs text-slate-500 dark:text-slate-400">
+      <div className="shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-slate-900/40 text-xs text-slate-500 dark:text-slate-400">
         <div>
           <span>Showing </span>
           <span className="font-medium text-slate-800 dark:text-slate-200">

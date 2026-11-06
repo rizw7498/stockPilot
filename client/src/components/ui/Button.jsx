@@ -21,7 +21,7 @@ export default function Button({
     secondary:
       'glass-3 text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10 active:bg-slate-200 dark:active:bg-white/5 border border-slate-200/80 dark:border-white/10',
     danger:
-      'bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 border border-rose-500/30 active:bg-rose-500/30',
+      'bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 active:bg-rose-200 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-300 dark:border-rose-500/30 dark:active:bg-rose-500/30 shadow-xs',
     ghost:
       'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5 active:bg-slate-200 dark:active:bg-white/10 border border-transparent',
   };

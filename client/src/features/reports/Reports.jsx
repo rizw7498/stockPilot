@@ -79,7 +79,7 @@ export default function Reports() {
       header: 'FIFO Unit Cost',
       align: 'right',
       tabular: true,
-      render: (cost) => <span className="font-mono text-slate-300">{formatCurrency(cost)}</span>,
+      render: (cost) => <span className="font-mono text-slate-600 dark:text-slate-300">{formatCurrency(cost)}</span>,
     },
     {
       key: 'totalValuationMinor',
@@ -87,24 +87,24 @@ export default function Reports() {
       align: 'right',
       tabular: true,
       render: (val) => (
-        <span className="font-mono font-bold text-slate-100">{formatCurrency(val)}</span>
+        <span className="font-mono font-bold text-slate-800 dark:text-slate-100">{formatCurrency(val)}</span>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Inventory Valuation Report
             </h1>
-            <span className="mono-chip text-[11px] text-blue-400">
+            <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
               FIFO Cost Basis
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Detailed asset breakdown across active warehouse facilities and current stock balances.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function Reports() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 shrink-0">
         <KpiCard
           label="Total Inventory Valuation"
           value={formatCurrency(report?.totalValuationMinor)}
@@ -142,6 +142,7 @@ export default function Reports() {
         loading={loading}
         emptyTitle="No valuation records found"
         emptyDescription="Inventory positions with recorded cost prices will automatically aggregate here."
+        className="flex-1"
       />
     </div>
   );

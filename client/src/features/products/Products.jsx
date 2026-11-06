@@ -259,12 +259,12 @@ export default function Products() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Product Catalog
             </h1>
             <span className="mono-chip text-[11px] text-slate-500 dark:text-slate-400">
@@ -332,6 +332,7 @@ export default function Products() {
         onRowClick={(row) => handleInspectStock(row)}
         emptyTitle="No products found"
         emptyDescription="Get started by creating your first catalog product or adjust your filter search."
+        className="flex-1"
       />
 
       {/* Slide-over Stock Details Drawer */}

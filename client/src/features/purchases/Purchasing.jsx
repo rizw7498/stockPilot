@@ -253,7 +253,7 @@ export default function Purchasing() {
       align: 'right',
       tabular: true,
       render: (minor) => (
-        <span className="font-semibold text-slate-100">
+        <span className="font-semibold text-slate-800 dark:text-slate-100 font-mono">
           {formatCurrency(minor)}
         </span>
       ),
@@ -294,19 +294,19 @@ export default function Purchasing() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Purchase Orders
             </h1>
-            <span className="mono-chip text-[11px] text-blue-400">
+            <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
               {orders.length} Orders
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Procure stock inventory, track vendor purchase orders, and record warehouse dock receipts.
           </p>
         </div>
@@ -350,7 +350,8 @@ export default function Purchasing() {
         loading={loading}
         onRowClick={(row) => setViewingPo(row)}
         emptyTitle="No purchase orders found"
-        emptyDescription="Create your first vendor purchase order to replenish stock across warehouses."
+        emptyDescription="Create your first vendor purchase order to replenish inventory stocks."
+        className="flex-1"
       />
 
       {/* Create Purchase Order Drawer */}

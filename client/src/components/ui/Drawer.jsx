@@ -34,13 +34,13 @@ export default function Drawer({
 
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
         <div
-          className={`w-screen ${width} glass-overlay border-l border-white/10 shadow-2xl flex flex-col h-full transform transition ease-out duration-200 animate-in slide-in-from-right ${className}`}
+          className={`w-screen ${width} glass-overlay border-l border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col h-full transform transition ease-out duration-200 animate-in slide-in-from-right ${className}`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/10 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/80 dark:border-white/10 shrink-0">
             <div>
-              <h2 className="text-[16px] font-semibold text-slate-100 tracking-tight">{title}</h2>
-              {subtitle && <p className="text-[12px] text-slate-400 mt-0.5">{subtitle}</p>}
+              <h2 className="text-[16px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight">{title}</h2>
+              {subtitle && <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
             </div>
             <button
               type="button"

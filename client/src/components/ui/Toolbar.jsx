@@ -32,8 +32,8 @@ export default function Toolbar({
   }, []);
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <div className={`flex flex-col gap-2 shrink-0 ${className}`}>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         {/* Left: Search & Filter Dropdowns */}
         <div className="flex items-center flex-1 gap-2.5 flex-wrap">
           {onSearchChange && (

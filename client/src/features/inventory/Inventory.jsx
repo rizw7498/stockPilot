@@ -341,17 +341,17 @@ export default function Inventory() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Inventory & Ledger Engine
             </h1>
-            <span className="mono-chip text-[11px] text-emerald-400">Append-Only Audit</span>
+            <span className="mono-chip text-[11px] text-emerald-500 dark:text-emerald-400">Append-Only Audit</span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Real-time on-hand positions, multi-warehouse allocations, and tamper-evident transaction logs.
           </p>
         </div>
@@ -367,33 +367,35 @@ export default function Inventory() {
       </div>
 
       {/* Tabs */}
-      <Tabs
-        activeTab={activeTab}
-        onChange={setActiveTab}
-        tabs={[
-          { id: 'balances', label: 'Warehouse Balances', count: balances.length, icon: Boxes },
-          { id: 'ledger', label: 'Movement Ledger', count: ledger.length, icon: History },
-          { id: 'lowstock', label: 'Low Stock Alerts', count: lowStockItems.length, icon: AlertTriangle },
-        ]}
-      />
+      <div className="shrink-0">
+        <Tabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          tabs={[
+            { id: 'balances', label: 'Warehouse Balances', count: balances.length, icon: Boxes },
+            { id: 'ledger', label: 'Movement Ledger', count: ledger.length, icon: History },
+            { id: 'lowstock', label: 'Low Stock Alerts', count: lowStockItems.length, icon: AlertTriangle },
+          ]}
+        />
+      </div>
 
       {/* Tab 1: Balances */}
       {activeTab === 'balances' && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex-1 flex flex-col min-h-0 space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 placeholder="Search balances by SKU or product..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-100 placeholder-slate-500 border border-white/10 focus:border-blue-500/60 outline-none w-72"
+                className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200/80 dark:border-white/10 focus:border-blue-500/60 outline-none w-72"
               />
 
               <select
                 value={warehouseFilter}
                 onChange={(e) => setWarehouseFilter(e.target.value)}
-                className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-200 border border-white/10 outline-none cursor-pointer [&>option]:bg-slate-900"
+                className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 outline-none cursor-pointer [&>option]:bg-white [&>option]:text-slate-900 dark:[&>option]:bg-slate-900 dark:[&>option]:text-slate-100"
               >
                 <option value="">All Warehouses</option>
                 {warehouses.map((w) => (
@@ -411,6 +413,7 @@ export default function Inventory() {
             loading={loading}
             emptyTitle="No stock balances found"
             emptyDescription="No warehouse positions currently match your selected filters."
+            className="flex-1"
           />
         </div>
       )}
@@ -423,6 +426,7 @@ export default function Inventory() {
           loading={loading}
           emptyTitle="No stock transactions recorded"
           emptyDescription="Audit records will automatically stream here when receipts, dispatches, or adjustments occur."
+          className="flex-1"
         />
       )}
 
@@ -434,6 +438,7 @@ export default function Inventory() {
           loading={loading}
           emptyTitle="Inventory levels healthy"
           emptyDescription="All catalog products are currently operating safely above their configured reorder levels."
+          className="flex-1"
         />
       )}
 
