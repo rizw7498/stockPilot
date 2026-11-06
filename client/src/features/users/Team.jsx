@@ -83,14 +83,14 @@ export default function Team() {
           .toUpperCase();
         return (
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center font-bold text-[11px]">
+            <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-300 border border-blue-500/30 flex items-center justify-center font-bold text-[11px]">
               {initials}
             </div>
             <div>
-              <div className="font-semibold text-slate-100">
+              <div className="font-semibold text-slate-800 dark:text-slate-100">
                 {row.userId?.name || 'Pending Invite'}
               </div>
-              <div className="text-[11px] text-slate-400 font-mono">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 {row.userId?.email || row.email}
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function Team() {
       key: 'role',
       header: 'Assigned Role',
       render: (_, row) => (
-        <span className="mono-chip text-blue-400 font-bold">
+        <span className="mono-chip text-blue-500 dark:text-blue-400 font-bold">
           {row.roleId?.name || row.role || 'Member'}
         </span>
       ),
@@ -118,7 +118,7 @@ export default function Team() {
       header: 'Member Since',
       align: 'right',
       render: (date) => (
-        <span className="text-xs text-slate-400 font-mono">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
           {new Date(date).toLocaleDateString()}
         </span>
       ),
@@ -126,18 +126,18 @@ export default function Team() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+    <div className="flex-1 flex flex-col min-h-0 space-y-3.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-white/5 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Team & Organization Access
             </h1>
-            <span className="mono-chip text-[11px] text-blue-400">
+            <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
               {members.length} Members
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Manage organization staff memberships and assign dynamic custom roles.
           </p>
         </div>
@@ -158,6 +158,7 @@ export default function Team() {
         loading={loading}
         emptyTitle="No team members found"
         emptyDescription="Invite team members to collaborate inside this organization workspace."
+        className="flex-1"
       />
 
       {/* Invite Member Modal */}

@@ -124,18 +124,18 @@ export default function Settings() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="pb-4 border-b border-white/5">
+      <div className="pb-4 border-b border-slate-200/80 dark:border-white/5">
         <div className="flex items-center gap-2.5">
-          <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+          <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Workspace Settings
           </h1>
-          <span className="mono-chip text-[11px] text-blue-400">
+          <span className="mono-chip text-[11px] text-blue-500 dark:text-blue-400 font-bold">
             {activeOrganization?.name || 'Workspace'}
           </span>
         </div>
-        <p className="text-[12px] text-slate-400 mt-0.5">
+        <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
           Manage tenant identity, user access, dynamic permissions, warehouse facilities, and visual themes.
         </p>
       </div>
@@ -143,8 +143,8 @@ export default function Settings() {
       {/* Two-Column Settings Layout */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         {/* Left: Settings Sidebar Navigation */}
-        <div className="md:col-span-4 lg:col-span-3">
-          <div className="glass-2 rounded-xl p-2.5 border border-white/10 space-y-1">
+        <div className="md:col-span-4 lg:col-span-3 sticky top-4">
+          <div className="glass-2 rounded-xl p-2.5 border border-slate-200/80 dark:border-white/10 space-y-1">
             <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Configuration Menu
             </div>

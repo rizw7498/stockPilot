@@ -34,7 +34,7 @@ export default function DataTable({
   const paginatedData = totalItems ? data : data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <div className={`relative flex flex-col flex-1 min-h-[380px] lg:min-h-0 glass-3 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs ${className}`}>
+    <div className={`relative flex flex-col flex-1 min-h-[380px] lg:max-h-[calc(100vh-215px)] glass-3 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs ${className}`}>
       {/* Table Scrollable Container */}
       <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full text-left border-collapse">
