@@ -44,7 +44,7 @@ const Select = forwardRef(function Select(
             ${
               error
                 ? 'border-rose-500/60 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30'
-                : 'border-white/10 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/40'
+                : 'border-white/10 input-theme-focus'
             }
             disabled:opacity-50 disabled:cursor-not-allowed
             [&>option]:bg-slate-900 [&>option]:text-slate-100

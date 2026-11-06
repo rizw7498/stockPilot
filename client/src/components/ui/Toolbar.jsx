@@ -47,7 +47,7 @@ export default function Toolbar({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full h-9 pl-8 pr-12 text-[12px] rounded-lg glass-3 text-slate-100 placeholder-slate-500 border border-white/10 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/40 outline-none transition-all"
+                className="w-full h-9 pl-8 pr-12 text-[12px] rounded-lg glass-3 text-slate-100 placeholder-slate-500 border border-white/10 input-theme-focus outline-none transition-all"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 {searchQuery ? (
