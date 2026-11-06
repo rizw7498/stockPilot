@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './app/AuthContext';
 import { ToastProvider } from './app/ToastContext';
+import { ThemeProvider } from './app/ThemeContext';
 import AppShell from './components/AppShell';
 
 // Auth Pages
@@ -30,9 +31,10 @@ import Audit from './features/audit/Audit';
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
             {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -63,6 +65,7 @@ export default function App() {
           </Routes>
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
+    </ThemeProvider>
+  </BrowserRouter>
   );
 }

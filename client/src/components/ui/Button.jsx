@@ -17,7 +17,7 @@ export default function Button({
 
   const variants = {
     primary:
-      'bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-xs shadow-blue-500/25 border border-blue-500/40',
+      'btn-theme-primary text-white shadow-xs',
     secondary:
       'glass-3 text-slate-200 hover:text-white hover:bg-white/10 active:bg-white/5 border border-white/10',
     danger:

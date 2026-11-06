@@ -127,7 +127,7 @@ export default function Sidebar() {
                     className={({ isActive }) =>
                       `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
                         isActive
-                          ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30 font-bold'
+                          ? 'nav-item-active'
                           : 'text-slate-400 hover:text-white hover:bg-slate-900'
                       }`
                     }
