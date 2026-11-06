@@ -164,3 +164,4 @@ export default function CommandPalette({ isOpen, onClose }) {
     </div>
   );
 }
+

@@ -90,3 +90,4 @@ background-image:
 | **`/audit` (Audit Logs)** | Cryptographically clean system audit trail with timestamp, actor, action, and domain entity. |
 | **`/reports` (Valuation Reports)** | Total inventory valuation KPI cards and detailed FIFO position tables. |
 | **`/login` & `/register` (Authentication)** | Atmospheric split-screen layout with 3 key architectural value props on the left and glass-overlay form on the right. |
+

@@ -201,3 +201,4 @@ export default function StatusPill({ status, label, showDot = true, className = 
     </span>
   );
 }
+
