@@ -208,7 +208,7 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/5 bg-slate-900/40 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <tr className="border-b border-slate-200/80 dark:border-white/5 bg-slate-50/90 dark:bg-slate-900/40 text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     <th className="px-4 py-3">Order Number</th>
                     <th className="px-4 py-3">Customer</th>
                     <th className="px-4 py-3">Date</th>
@@ -216,7 +216,7 @@ export default function Dashboard() {
                     <th className="px-4 py-3 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-[13px]">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-[13px]">
                   {loading ? (
                     <Skeleton variant="table-row" rows={5} />
                   ) : !data?.recentOrders || data.recentOrders.length === 0 ? (
@@ -230,18 +230,18 @@ export default function Dashboard() {
                       <tr
                         key={ord._id}
                         onClick={() => navigate('/sales')}
-                        className="hover:bg-blue-500/[0.04] transition-colors cursor-pointer"
+                        className="hover:bg-slate-50/80 dark:hover:bg-blue-500/[0.04] transition-colors cursor-pointer"
                       >
-                        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-400">
+                        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-500 dark:text-blue-400">
                           {ord.orderNumber}
                         </td>
-                        <td className="px-4 py-2.5 text-slate-200">
+                        <td className="px-4 py-2.5 text-slate-700 dark:text-slate-200">
                           {ord.customerId?.name || 'Standard Account'}
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-slate-400 font-mono">
+                        <td className="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400 font-mono">
                           {new Date(ord.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-2.5 text-right font-mono tabular-nums font-medium text-slate-100">
+                        <td className="px-4 py-2.5 text-right font-mono tabular-nums font-medium text-slate-900 dark:text-slate-100">
                           {formatCurrency(ord.totalAmountMinor)}
                         </td>
                         <td className="px-4 py-2.5 text-center">

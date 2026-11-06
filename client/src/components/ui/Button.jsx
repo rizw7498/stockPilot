@@ -13,17 +13,17 @@ export default function Button({
   ...props
 }) {
   const baseClasses =
-    'inline-flex items-center justify-center font-semibold transition-all duration-150 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:ring-offset-2 focus:ring-offset-[#070B14] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
+    'inline-flex items-center justify-center font-semibold transition-all duration-150 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-[#070B14] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
 
   const variants = {
     primary:
       'btn-theme-primary text-white shadow-xs',
     secondary:
-      'glass-3 text-slate-200 hover:text-white hover:bg-white/10 active:bg-white/5 border border-white/10',
+      'glass-3 text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10 active:bg-slate-200 dark:active:bg-white/5 border border-slate-200/80 dark:border-white/10',
     danger:
-      'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 active:bg-rose-500/30',
+      'bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 border border-rose-500/30 active:bg-rose-500/30',
     ghost:
-      'text-slate-400 hover:text-slate-200 hover:bg-white/5 active:bg-white/10 border border-transparent',
+      'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5 active:bg-slate-200 dark:active:bg-white/10 border border-transparent',
   };
 
   const sizes = {

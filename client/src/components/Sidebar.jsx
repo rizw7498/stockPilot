@@ -84,28 +84,28 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`glass-1 text-slate-300 flex flex-col shrink-0 select-none transition-all duration-200 border-r border-white/10 ${
+      className={`glass-1 text-slate-700 dark:text-slate-300 flex flex-col shrink-0 select-none transition-all duration-200 border-r border-slate-200/80 dark:border-white/10 ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-3.5 border-b border-white/10 bg-slate-950/40 shrink-0">
+      <div className="h-16 flex items-center justify-between px-3.5 border-b border-slate-200/80 dark:border-white/10 bg-white/40 dark:bg-slate-950/40 shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-100 flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
-            <Boxes className="w-4 h-4 text-blue-400" />
+          <div className="w-8 h-8 rounded-lg bg-white dark:bg-white/5 border border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100 flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+            <Boxes className="w-4 h-4 text-blue-500" />
           </div>
 
           {!isCollapsed && (
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-100 text-[13px] tracking-tight truncate">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 text-[13px] tracking-tight truncate">
                   StockPilot
                 </span>
-                <span className="mono-chip text-[9px] text-slate-400 py-0 px-1">
+                <span className="mono-chip text-[9px] text-slate-500 dark:text-slate-400 py-0 px-1">
                   SaaS
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 font-mono truncate">
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
                 {activeOrganization?.name || 'Workspace'}
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function Sidebar() {
           type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
           title={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
-          className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+          className="p-1 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors cursor-pointer"
         >
           {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
         </button>
@@ -128,7 +128,7 @@ export default function Sidebar() {
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
             {!isCollapsed && (
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-2.5 mb-1 font-mono">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-500 px-2.5 mb-1 font-mono">
                 {group.title}
               </div>
             )}
@@ -148,7 +148,7 @@ export default function Sidebar() {
                       } ${
                         isActive
                           ? 'nav-item-active'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-white/5'
                       }`
                     }
                   >
@@ -173,9 +173,9 @@ export default function Sidebar() {
       </nav>
 
       {/* System Status Footer */}
-      <div className="p-3 border-t border-white/10 bg-slate-950/40 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+      <div className="p-3 border-t border-slate-200/80 dark:border-white/10 bg-white/40 dark:bg-slate-950/40 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 shrink-0">
         <div className="flex items-center gap-2 overflow-hidden">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs shadow-emerald-400" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-xs shadow-emerald-400" />
           {!isCollapsed && <span className="truncate text-xs">All systems nominal</span>}
         </div>
         {!isCollapsed && <span className="font-mono text-[10px] text-slate-500">v2.4</span>}

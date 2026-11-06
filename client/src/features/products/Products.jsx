@@ -187,9 +187,9 @@ export default function Products() {
       header: 'Product Name',
       render: (name, row) => (
         <div>
-          <div className="font-medium text-slate-100">{name}</div>
+          <div className="font-medium text-slate-800 dark:text-slate-100">{name}</div>
           {row.description && (
-            <div className="text-[11px] text-slate-400 truncate max-w-xs">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs">
               {row.description}
             </div>
           )}
@@ -200,7 +200,7 @@ export default function Products() {
       key: 'categoryId',
       header: 'Category',
       render: (cat) => (
-        <span className="text-slate-300 text-xs">
+        <span className="text-slate-600 dark:text-slate-300 text-xs">
           {cat?.name || 'Unassigned'}
         </span>
       ),
@@ -217,10 +217,10 @@ export default function Products() {
             : 0;
         return (
           <div className="text-right">
-            <div className="font-semibold text-slate-100">{formatCurrency(price)}</div>
-            <div className="text-[10px] text-slate-400 font-mono flex items-center justify-end gap-1">
+            <div className="font-semibold text-slate-800 dark:text-slate-100">{formatCurrency(price)}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono flex items-center justify-end gap-1">
               <span>{formatCurrency(row.costMinor)}</span>
-              {margin > 0 && <span className="text-emerald-400">({margin}%)</span>}
+              {margin > 0 && <span className="text-emerald-500 dark:text-emerald-400">({margin}%)</span>}
             </div>
           </div>
         );
@@ -250,7 +250,7 @@ export default function Products() {
             e.stopPropagation();
             handleInspectStock(row);
           }}
-          className="text-slate-400 hover:text-blue-400"
+          className="text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
         >
           Balances <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
         </Button>
@@ -261,17 +261,17 @@ export default function Products() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/5">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               Product Catalog
             </h1>
-            <span className="mono-chip text-[11px] text-slate-400">
+            <span className="mono-chip text-[11px] text-slate-500 dark:text-slate-400">
               {products.length} SKUs
             </span>
           </div>
-          <p className="text-[12px] text-slate-400 mt-0.5">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
             Manage SKU records, barcode identifiers, pricing formulas, and warehouse allocations.
           </p>
         </div>

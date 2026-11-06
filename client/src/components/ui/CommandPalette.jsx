@@ -154,7 +154,7 @@ export default function CommandPalette({ isOpen, onClose }) {
         </div>
 
         {/* Footer shortcuts */}
-        <div className="px-4 py-2 border-t border-white/10 bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <div className="px-4 py-2 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>

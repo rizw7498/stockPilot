@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --font-sans: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -55,32 +57,32 @@
 
 /* Light Mode Overrides */
 [data-mode="light"], .light {
-  --bg-base: #F4F6FA;
+  --bg-base: #F8FAFC;
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-tertiary: #64748B;
 
-  --glass-1-bg: rgba(255, 255, 255, 0.78);
-  --glass-1-border: rgba(15, 23, 42, 0.08);
+  --glass-1-bg: rgba(255, 255, 255, 0.85);
+  --glass-1-border: rgba(226, 232, 240, 0.9);
 
-  --glass-2-bg: rgba(255, 255, 255, 0.88);
-  --glass-2-border: rgba(15, 23, 42, 0.08);
+  --glass-2-bg: rgba(255, 255, 255, 0.92);
+  --glass-2-border: rgba(226, 232, 240, 0.9);
 
-  --glass-3-bg: rgba(255, 255, 255, 0.96);
-  --glass-3-border: rgba(15, 23, 42, 0.08);
+  --glass-3-bg: rgba(255, 255, 255, 0.98);
+  --glass-3-border: rgba(226, 232, 240, 0.9);
 
-  --glass-overlay-bg: rgba(255, 255, 255, 0.98);
-  --glass-overlay-border: rgba(15, 23, 42, 0.12);
+  --glass-overlay-bg: rgba(255, 255, 255, 0.99);
+  --glass-overlay-border: rgba(203, 213, 225, 0.9);
 
-  --scrim-bg: rgba(15, 23, 42, 0.45);
+  --scrim-bg: rgba(15, 23, 42, 0.35);
 }
 
 [data-mode="light"] .app-atmosphere,
 .light .app-atmosphere {
-  background-color: #F4F6FA;
+  background-color: #F8FAFC;
   background-image: 
-    radial-gradient(circle 850px at 0% 0%, var(--radial-light-1, rgba(59, 130, 246, 0.10)), transparent 85%),
-    radial-gradient(circle 800px at 100% 100%, var(--radial-light-2, rgba(14, 165, 233, 0.06)), transparent 85%);
+    radial-gradient(circle 850px at 0% 0%, var(--radial-light-1, rgba(59, 130, 246, 0.08)), transparent 85%),
+    radial-gradient(circle 800px at 100% 100%, var(--radial-light-2, rgba(14, 165, 233, 0.05)), transparent 85%);
 }
 
 [data-mode="light"] .text-slate-100,
@@ -106,7 +108,7 @@
 [data-mode="light"] .mono-chip,
 .light .mono-chip {
   background: rgba(15, 23, 42, 0.05) !important;
-  border-color: rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
   color: #1E293B !important;
 }
 
@@ -115,14 +117,56 @@
 .light input,
 .light select {
   color: #0F172A !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(15, 23, 42, 0.12) !important;
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
 }
 
 [data-mode="light"] select option,
 .light select option {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
+}
+
+/* Light mode table & container styling */
+[data-mode="light"] thead tr,
+.light thead tr {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-mode="light"] thead th,
+.light thead th {
+  color: #475569 !important;
+}
+
+[data-mode="light"] tbody tr {
+  border-color: #F1F5F9 !important;
+}
+
+[data-mode="light"] tbody tr:hover,
+.light tbody tr:hover {
+  background-color: rgba(241, 245, 249, 0.75) !important;
+}
+
+[data-mode="light"] td,
+.light td {
+  color: #1E293B;
+}
+
+[data-mode="light"] .border-white\/10,
+.light .border-white\/10,
+[data-mode="light"] .border-white\/5,
+.light .border-white\/5 {
+  border-color: #E2E8F0 !important;
+}
+
+[data-mode="light"] .bg-slate-900\/60,
+.light .bg-slate-900\/60,
+[data-mode="light"] .bg-slate-900\/40,
+.light .bg-slate-900\/40,
+[data-mode="light"] .bg-slate-950\/40,
+.light .bg-slate-950\/40 {
+  background-color: #F8FAFC !important;
 }
 
 /* Color Theme Palettes */

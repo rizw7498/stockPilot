@@ -21,26 +21,26 @@ export default function KpiCard({
     <div
       onClick={onClick}
       className={`glass-2 rounded-xl p-5 flex flex-col justify-between relative overflow-hidden transition-all duration-150
-        ${isClickable ? 'cursor-pointer hover:border-white/20 hover:bg-slate-800/40' : ''}
+        ${isClickable ? 'cursor-pointer hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/60 dark:hover:bg-slate-800/40' : ''}
         ${
           isWarning
-            ? 'border-t-2 border-t-amber-400 shadow-[inset_0_2px_12px_rgba(251,191,36,0.12)]'
+            ? 'border-t-2 border-t-amber-500 shadow-[inset_0_2px_12px_rgba(251,191,36,0.12)]'
             : ''
         }
         ${span === 2 ? 'col-span-1 md:col-span-2' : 'col-span-1'}
         ${className}`}
     >
       {/* Top row: Label & Icon */}
-      <div className="flex items-center justify-between text-slate-400 mb-3">
-        <span className="text-[12px] font-medium tracking-wide uppercase text-slate-400">
+      <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-3">
+        <span className="text-[12px] font-medium tracking-wide uppercase text-slate-500 dark:text-slate-400">
           {label}
         </span>
         {Icon && (
           <div
             className={`p-1.5 rounded-lg border ${
               isWarning
-                ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-                : 'bg-white/5 border-white/5 text-slate-400'
+                ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 dark:text-amber-400'
+                : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -51,10 +51,10 @@ export default function KpiCard({
       {/* Main value */}
       <div className="flex items-baseline justify-between gap-2 mt-auto">
         <div>
-          <div className="text-[28px] md:text-[30px] font-semibold text-slate-100 font-mono tracking-tight tabular-nums leading-none">
+          <div className="text-[28px] md:text-[30px] font-semibold text-slate-900 dark:text-slate-100 font-mono tracking-tight tabular-nums leading-none">
             {value}
           </div>
-          {subvalue && <div className="text-[11px] text-slate-400 mt-1">{subvalue}</div>}
+          {subvalue && <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{subvalue}</div>}
         </div>
 
         {/* Delta Chip */}

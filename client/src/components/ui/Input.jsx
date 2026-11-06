@@ -20,7 +20,7 @@ const Input = forwardRef(function Input(
   return (
     <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
       {label && (
-        <label className="text-[12px] font-medium text-slate-300 flex items-center justify-between">
+        <label className="text-[12px] font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
           <span>
             {label}
             {required && <span className="text-rose-400 ml-1 font-semibold">*</span>}
@@ -39,14 +39,14 @@ const Input = forwardRef(function Input(
           ref={ref}
           type={type}
           disabled={disabled}
-          className={`w-full h-9 px-3 text-[13px] rounded-lg glass-3 text-slate-100 placeholder-slate-500
+          className={`w-full h-9 px-3 text-[13px] rounded-lg glass-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
             border transition-all duration-150 outline-none
             ${Icon ? 'pl-9' : ''}
             ${RightIcon || error ? 'pr-9' : ''}
             ${
               error
                 ? 'border-rose-500/60 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/30'
-                : 'border-white/10 input-theme-focus'
+                : 'border-slate-300 dark:border-white/10 input-theme-focus'
             }
             disabled:opacity-50 disabled:cursor-not-allowed
             ${className}`}

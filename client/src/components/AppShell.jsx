@@ -22,7 +22,7 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#070B14] text-slate-400 gap-3">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#070B14] text-slate-500 dark:text-slate-400 gap-3">
         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
         <span className="text-xs font-mono uppercase tracking-widest text-slate-500">
           Loading StockPilot...
@@ -36,7 +36,7 @@ export default function AppShell() {
   }
 
   return (
-    <div className="flex h-screen bg-[#070B14] text-slate-100 overflow-hidden font-sans relative app-atmosphere">
+    <div className="flex h-screen text-slate-900 dark:text-slate-100 overflow-hidden font-sans relative app-atmosphere">
       {/* SVG Grain Overlay */}
       <div className="app-grain" />
 

@@ -297,8 +297,8 @@ export default function Settings() {
                       onClick={() => setMode('dark')}
                       className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         mode === 'dark'
-                          ? 'glass-2 border-white/30 bg-white/10 shadow-md'
-                          : 'glass-3 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                          ? 'glass-2 border-slate-300 dark:border-white/30 bg-slate-100 dark:bg-white/10 shadow-sm'
+                          : 'glass-3 border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -306,17 +306,17 @@ export default function Settings() {
                           <Moon className="w-5 h-5" />
                         </div>
                         <div>
-                          <div className="text-[13px] font-semibold text-slate-100">
+                          <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
                             Dark Mode
                           </div>
-                          <div className="text-[11px] text-slate-400">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
                             Deep slate #070B14 base
                           </div>
                         </div>
                       </div>
 
                       {mode === 'dark' && (
-                        <span className="mono-chip text-[9px] text-emerald-400 flex items-center gap-1">
+                        <span className="mono-chip text-[9px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                           <Check className="w-2.5 h-2.5" /> Selected
                         </span>
                       )}
@@ -327,8 +327,8 @@ export default function Settings() {
                       onClick={() => setMode('light')}
                       className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         mode === 'light'
-                          ? 'glass-2 border-white/30 bg-white/10 shadow-md'
-                          : 'glass-3 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                          ? 'glass-2 border-blue-500 dark:border-white/30 bg-blue-50/50 dark:bg-white/10 shadow-sm'
+                          : 'glass-3 border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -336,17 +336,17 @@ export default function Settings() {
                           <Sun className="w-5 h-5" />
                         </div>
                         <div>
-                          <div className="text-[13px] font-semibold text-slate-100">
+                          <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
                             Light Mode
                           </div>
-                          <div className="text-[11px] text-slate-400">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
                             Clean daylight #F4F6FA base
                           </div>
                         </div>
                       </div>
 
                       {mode === 'light' && (
-                        <span className="mono-chip text-[9px] text-emerald-400 flex items-center gap-1">
+                        <span className="mono-chip text-[9px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                           <Check className="w-2.5 h-2.5" /> Selected
                         </span>
                       )}
@@ -354,11 +354,11 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-white/5">
-                  <h4 className="text-[13px] font-semibold text-slate-100 mb-1">
+                <div className="pt-2 border-t border-slate-200/80 dark:border-white/5">
+                  <h4 className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 mb-1">
                     Select Accent Palette
                   </h4>
-                  <p className="text-xs text-slate-400 mb-3">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
                     Your selected color theme seamlessly adapts buttons, active navigation indicators, and soft background radial lights.
                   </p>
                 </div>

@@ -45,18 +45,18 @@ export default function Drawer({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg glass-3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+              className="w-8 h-8 rounded-lg glass-3 border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 text-slate-200">{children}</div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 text-slate-700 dark:text-slate-200">{children}</div>
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-white/10 bg-slate-900/40 shrink-0 flex items-center justify-end gap-3">
+            <div className="px-6 py-4 border-t border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-slate-900/40 shrink-0 flex items-center justify-end gap-3">
               {footer}
             </div>
           )}

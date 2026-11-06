@@ -47,19 +47,19 @@ export default function Toolbar({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full h-9 pl-8 pr-12 text-[12px] rounded-lg glass-3 text-slate-100 placeholder-slate-500 border border-white/10 input-theme-focus outline-none transition-all"
+                className="w-full h-9 pl-8 pr-12 text-[12px] rounded-lg glass-3 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200/80 dark:border-white/10 input-theme-focus outline-none transition-all"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 {searchQuery ? (
                   <button
                     type="button"
                     onClick={() => onSearchChange('')}
-                    className="text-slate-400 hover:text-slate-200 p-0.5"
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 ) : (
-                  <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-white/5 border border-white/10 rounded">
+                  <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded">
                     /
                   </kbd>
                 )}
@@ -73,7 +73,7 @@ export default function Toolbar({
               key={filter.id}
               value={filter.value}
               onChange={(e) => filter.onChange(e.target.value)}
-              className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-200 border border-white/10 focus:border-blue-500/60 outline-none cursor-pointer [&>option]:bg-slate-900 [&>option]:text-slate-100"
+              className="h-9 px-3 text-[12px] rounded-lg glass-3 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 focus:border-blue-500/60 outline-none cursor-pointer [&>option]:bg-white [&>option]:text-slate-900 dark:[&>option]:bg-slate-900 dark:[&>option]:text-slate-100"
             >
               {filter.options.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -91,11 +91,11 @@ export default function Toolbar({
       {/* Active Filter Chips */}
       {activeFilters.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap pt-1">
-          <span className="text-[11px] text-slate-400 font-medium">Active filters:</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Active filters:</span>
           {activeFilters.map((af) => (
             <span
               key={af.id}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium glass-3 border border-white/10 text-slate-200"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium glass-3 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200"
             >
               <span className="text-slate-400">{af.label}:</span>
               <span>{af.value}</span>
