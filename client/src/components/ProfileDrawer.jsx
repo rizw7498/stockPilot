@@ -1,6 +1,6 @@
-import React from 'react';
-import { useAuth } from '../app/AuthContext';
-import { useTheme } from '../app/ThemeContext';
+import React from "react";
+import { useAuth } from "../app/AuthContext";
+import { useTheme } from "../app/ThemeContext";
 import {
   User,
   Shield,
@@ -13,22 +13,29 @@ import {
   Key,
   ShieldCheck,
   Calendar,
-} from 'lucide-react';
-import Drawer from './ui/Drawer';
-import Button from './ui/Button';
+} from "lucide-react";
+import Drawer from "./ui/Drawer";
+import Button from "./ui/Button";
 
 export default function ProfileDrawer({ isOpen, onClose }) {
-  const { user, activeOrganization, role, memberships, switchOrganization, logout } = useAuth();
+  const {
+    user,
+    activeOrganization,
+    role,
+    memberships,
+    switchOrganization,
+    logout,
+  } = useAuth();
   const { theme, setTheme, themes } = useTheme();
 
   const userInitials = user?.name
     ? user.name
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('')
+        .join("")
         .toUpperCase()
         .slice(0, 2)
-    : 'U';
+    : "U";
 
   return (
     <Drawer
@@ -39,7 +46,9 @@ export default function ProfileDrawer({ isOpen, onClose }) {
       subtitle="Operational identity, organization memberships, and preferences"
       footer={
         <div className="w-full flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 font-mono">StockPilot v2.4</span>
+          <span className="text-[11px] text-slate-500 font-mono">
+            StockPilot v2.4
+          </span>
           <Button
             variant="danger"
             size="sm"
@@ -81,11 +90,17 @@ export default function ProfileDrawer({ isOpen, onClose }) {
 
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
             <div>
-              <span className="text-[10px] text-slate-500 font-mono uppercase block">Assigned Role</span>
-              <span className="font-semibold text-slate-200">{role || 'Operator'}</span>
+              <span className="text-[10px] text-slate-500 font-mono uppercase block">
+                Assigned Role
+              </span>
+              <span className="font-semibold text-slate-200">
+                {role || "Operator"}
+              </span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-500 font-mono uppercase block">Security Status</span>
+              <span className="text-[10px] text-slate-500 font-mono uppercase block">
+                Security Status
+              </span>
               <span className="text-emerald-400 font-medium flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" /> Active Session
               </span>
@@ -107,25 +122,28 @@ export default function ProfileDrawer({ isOpen, onClose }) {
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-slate-100">
-                    {activeOrganization?.name || 'Workspace'}
+                    {activeOrganization?.name || "Workspace"}
                   </div>
                   <div className="text-[10px] text-slate-400 font-mono">
-                    Currency: {activeOrganization?.currency || 'USD'}
+                    Currency: {activeOrganization?.currency || "USD"}
                   </div>
                 </div>
               </div>
 
               <span className="mono-chip text-[10px] text-blue-400 font-bold">
-                {activeOrganization?.currency || 'USD'}
+                {activeOrganization?.currency || "USD"}
               </span>
             </div>
 
             {memberships && memberships.length > 1 && (
               <div className="pt-2 border-t border-white/5 space-y-1.5">
-                <div className="text-[10px] text-slate-400 font-medium">Switch Tenant Workspace:</div>
+                <div className="text-[10px] text-slate-400 font-medium">
+                  Switch Tenant Workspace:
+                </div>
                 <div className="space-y-1">
                   {memberships.map((m) => {
-                    const isCurrent = m.organization?._id === activeOrganization?._id;
+                    const isCurrent =
+                      m.organization?._id === activeOrganization?._id;
                     return (
                       <button
                         key={m.id}
@@ -133,12 +151,14 @@ export default function ProfileDrawer({ isOpen, onClose }) {
                         onClick={() => switchOrganization(m.organization?._id)}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors ${
                           isCurrent
-                            ? 'bg-blue-500/20 text-blue-300 font-medium'
-                            : 'text-slate-300 hover:bg-white/5'
+                            ? "bg-blue-500/20 text-blue-300 font-medium"
+                            : "text-slate-300 hover:bg-white/5"
                         }`}
                       >
                         <span className="truncate">{m.organization?.name}</span>
-                        {isCurrent && <Check className="w-3.5 h-3.5 text-blue-400" />}
+                        {isCurrent && (
+                          <Check className="w-3.5 h-3.5 text-blue-400" />
+                        )}
                       </button>
                     );
                   })}
@@ -170,8 +190,8 @@ export default function ProfileDrawer({ isOpen, onClose }) {
                     onClick={() => setTheme(t.id)}
                     className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
                       isSelected
-                        ? 'border-white/30 bg-white/10 text-white font-semibold shadow-xs'
-                        : 'border-white/5 bg-white/[0.02] text-slate-300 hover:bg-white/5 hover:border-white/10'
+                        ? "border-white/30 bg-white/10 text-white font-semibold shadow-xs"
+                        : "border-white/5 bg-white/[0.02] text-slate-300 hover:bg-white/5 hover:border-white/10"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -181,7 +201,9 @@ export default function ProfileDrawer({ isOpen, onClose }) {
                       />
                       <span className="text-[12px]">{t.name}</span>
                     </div>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-slate-100" />}
+                    {isSelected && (
+                      <Check className="w-3.5 h-3.5 text-slate-100" />
+                    )}
                   </button>
                 );
               })}

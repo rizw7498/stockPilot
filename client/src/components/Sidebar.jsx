@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,19 +17,28 @@ import {
   History,
   Warehouse,
   ArrowLeftRight,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 import { useAuth } from '../app/AuthContext';
+import Tooltip from './ui/Tooltip';
 
 export default function Sidebar() {
   const { role, user, activeOrganization } = useAuth();
   const isSuperAdmin = user?.isSuperAdmin || role === 'Super Admin';
 
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('stockpilot_sidebar_collapsed') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('stockpilot_sidebar_collapsed', isCollapsed);
+  }, [isCollapsed]);
+
   const navGroups = [
     {
       title: 'Overview',
-      items: [
-        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-      ],
+      items: [{ label: 'Dashboard', path: '/', icon: LayoutDashboard }],
     },
     {
       title: 'Catalog',
@@ -64,15 +73,11 @@ export default function Sidebar() {
     },
     {
       title: 'Returns',
-      items: [
-        { label: 'Returns & Refunds', path: '/returns', icon: RotateCcw },
-      ],
+      items: [{ label: 'Returns & RMAs', path: '/returns', icon: RotateCcw }],
     },
     {
       title: 'Analytics',
-      items: [
-        { label: 'Reports & Valuation', path: '/reports', icon: BarChart3 },
-      ],
+      items: [{ label: 'Valuation & Reports', path: '/reports', icon: BarChart3 }],
     },
     {
       title: 'Administration',
@@ -85,57 +90,89 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-slate-950 text-slate-300 flex flex-col shrink-0 border-r border-slate-800/80 select-none">
-      {/* Brand & Organization Identity */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/20 border border-blue-400/30">
-            SP
+    <aside
+      className={`glass-1 text-slate-300 flex flex-col shrink-0 select-none transition-all duration-200 border-r border-white/10 ${
+        isCollapsed ? 'w-16' : 'w-64'
+      }`}
+    >
+      {/* Brand Header */}
+      <div className="h-16 flex items-center justify-between px-3.5 border-b border-white/10 bg-slate-950/40 shrink-0">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-100 flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
+            <Boxes className="w-4 h-4 text-blue-400" />
           </div>
-          <div>
-            <span className="font-bold text-white text-sm tracking-tight block leading-tight">
-              StockPilot
-            </span>
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-              {activeOrganization?.name ? activeOrganization.name.slice(0, 16) : 'Inventory'}
-            </span>
-          </div>
+
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-100 text-[13px] tracking-tight truncate">
+                  StockPilot
+                </span>
+                <span className="mono-chip text-[9px] text-slate-400 py-0 px-1">
+                  SaaS
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-mono truncate">
+                {activeOrganization?.name || 'Workspace'}
+              </div>
+            </div>
+          )}
         </div>
 
-        {isSuperAdmin && (
-          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-extrabold px-1.5 py-0.5 rounded tracking-wider uppercase">
-            Admin
-          </span>
-        )}
+        {/* Collapse toggle */}
+        <button
+          type="button"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
+          className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+        >
+          {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* Nav List */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
         {navGroups.map((group, gIdx) => (
-          <div key={gIdx}>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">
-              {group.title}
-            </div>
+          <div key={gIdx} className="space-y-1">
+            {!isCollapsed && (
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-2.5 mb-1 font-mono">
+                {group.title}
+              </div>
+            )}
+
             <div className="space-y-0.5">
               {group.items.map((item, iIdx) => {
                 const Icon = item.icon;
-                return (
+
+                const linkContent = (
                   <NavLink
                     key={iIdx}
                     to={item.path}
                     end={item.path === '/'}
                     className={({ isActive }) =>
-                      `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                      `flex items-center gap-2.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                        isCollapsed ? 'justify-center p-2' : 'px-2.5 py-1.5'
+                      } ${
                         isActive
                           ? 'nav-item-active'
-                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
                       }`
                     }
                   >
                     <Icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
                   </NavLink>
                 );
+
+                if (isCollapsed) {
+                  return (
+                    <Tooltip key={iIdx} content={item.label} position="right" className="z-50">
+                      {linkContent}
+                    </Tooltip>
+                  );
+                }
+
+                return linkContent;
               })}
             </div>
           </div>
@@ -143,12 +180,12 @@ export default function Sidebar() {
       </nav>
 
       {/* System Status Footer */}
-      <div className="p-3.5 border-t border-slate-900 bg-slate-950/60 flex items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Ledger Operational</span>
+      <div className="p-3 border-t border-white/10 bg-slate-950/40 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs shadow-emerald-400" />
+          {!isCollapsed && <span className="truncate text-xs">All systems nominal</span>}
         </div>
-        <span className="font-mono text-[10px] text-slate-400 font-bold">v1.0.0</span>
+        {!isCollapsed && <span className="font-mono text-[10px] text-slate-500">v2.4</span>}
       </div>
     </aside>
   );
