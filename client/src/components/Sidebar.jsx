@@ -19,6 +19,7 @@ import {
   ArrowLeftRight,
   PanelLeftClose,
   PanelLeft,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../app/AuthContext';
 import Tooltip from './ui/Tooltip';
@@ -84,6 +85,7 @@ export default function Sidebar() {
       items: [
         { label: 'Roles & Permissions', path: '/roles', icon: ShieldCheck },
         { label: 'Team Members', path: '/team', icon: UserPlus },
+        { label: 'Workspace Settings', path: '/settings', icon: Settings },
         { label: 'Audit Logs', path: '/audit', icon: History },
       ],
     },

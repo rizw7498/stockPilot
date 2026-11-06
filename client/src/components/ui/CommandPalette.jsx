@@ -17,6 +17,7 @@ import {
   History,
   X,
   CreditCard,
+  Settings,
 } from 'lucide-react';
 
 const NAVIGATION_ITEMS = [
@@ -35,6 +36,7 @@ const NAVIGATION_ITEMS = [
   { name: 'Warehouses', path: '/warehouses', group: 'Master Data', icon: Building2 },
   { name: 'Categories', path: '/categories', group: 'Master Data', icon: Boxes },
   { name: 'Team Members', path: '/team', group: 'Administration', icon: Users },
+  { name: 'Workspace Settings', path: '/settings', group: 'Administration', icon: Settings },
   { name: 'Reports & Analytics', path: '/reports', group: 'Analytics', icon: FileSpreadsheet },
   { name: 'Audit Logs', path: '/audit', group: 'Analytics', icon: History },
 ];

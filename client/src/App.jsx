@@ -27,6 +27,7 @@ import Reports from './features/reports/Reports';
 import Roles from './features/roles/Roles';
 import Team from './features/users/Team';
 import Audit from './features/audit/Audit';
+import Settings from './features/settings/Settings';
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="/roles" element={<Roles />} />
               <Route path="/team" element={<Team />} />
               <Route path="/audit" element={<Audit />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
 
             {/* Fallback */}
