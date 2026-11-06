@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../app/AuthContext';
 import { useToast } from '../../app/ToastContext';
-import { UserPlus, Shield, Mail, X, Check } from 'lucide-react';
+import { UserPlus, Shield, Mail } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
+import DataTable from '../../components/ui/DataTable';
+import Modal from '../../components/ui/Modal';
+import StatusPill from '../../components/ui/StatusPill';
 
 export default function Team() {
   const { user } = useAuth();
@@ -44,6 +50,10 @@ export default function Team() {
 
   const handleInvite = async (e) => {
     e.preventDefault();
+    if (!email.trim()) {
+      toast.error('Email is required');
+      return;
+    }
     setInviting(true);
     try {
       await api.post('/organizations/invite', {
@@ -63,162 +73,149 @@ export default function Team() {
     }
   };
 
+  const columns = [
+    {
+      key: 'name',
+      header: 'Team Member',
+      render: (_, row) => {
+        const initials = (row.userId?.name || row.email || 'U')
+          .slice(0, 2)
+          .toUpperCase();
+        return (
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center font-bold text-[11px]">
+              {initials}
+            </div>
+            <div>
+              <div className="font-semibold text-slate-100">
+                {row.userId?.name || 'Pending Invite'}
+              </div>
+              <div className="text-[11px] text-slate-400 font-mono">
+                {row.userId?.email || row.email}
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'role',
+      header: 'Assigned Role',
+      render: (_, row) => (
+        <span className="mono-chip text-blue-400 font-bold">
+          {row.roleId?.name || row.role || 'Member'}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Membership Status',
+      align: 'center',
+      render: (status) => <StatusPill status={status || 'ACTIVE'} />,
+    },
+    {
+      key: 'createdAt',
+      header: 'Member Since',
+      align: 'right',
+      render: (date) => (
+        <span className="text-xs text-slate-400 font-mono">
+          {new Date(date).toLocaleDateString()}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Team Members & Access</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+              Team & Organization Access
+            </h1>
+            <span className="mono-chip text-[11px] text-blue-400">
+              {members.length} Members
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-400 mt-0.5">
             Manage organization staff memberships and assign dynamic custom roles.
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          icon={UserPlus}
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
         >
-          <UserPlus className="w-4 h-4" />
-          Invite Team Member
-        </button>
+          Invite Member
+        </Button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <th className="py-3 px-4">User</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Assigned Role</th>
-              <th className="py-3 px-4 text-center">Status</th>
-              <th className="py-3 px-4 text-right">Joined / Invited</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {loading ? (
-              <tr>
-                <td colSpan={5} className="py-12 text-center text-slate-400">
-                  Loading members...
-                </td>
-              </tr>
-            ) : members.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-12 text-center text-slate-400">
-                  No members found.
-                </td>
-              </tr>
-            ) : (
-              members.map((m) => (
-                <tr key={m._id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-slate-900">
-                    {m.userId?.name || 'Invited User'}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 text-xs">
-                    {m.userId?.email}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                      <Shield className="w-3.5 h-3.5" />
-                      {m.roleId?.name || 'Staff'}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        m.status === 'ACTIVE'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {m.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right text-xs text-slate-500">
-                    {new Date(m.createdAt).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={members}
+        loading={loading}
+        emptyTitle="No team members found"
+        emptyDescription="Invite team members to collaborate inside this organization workspace."
+      />
 
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-              <h3 className="font-bold text-slate-900 text-base">Invite Member</h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Invite Member Modal */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        maxWidth="max-w-md"
+        title="Invite Team Member"
+        subtitle="Send an invitation link with pre-assigned role permissions"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setModalOpen(false)}
+              disabled={inviting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleInvite}
+              loading={inviting}
+            >
+              Send Invitation
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleInvite} className="space-y-4">
+          <Input
+            label="Full Name"
+            placeholder="e.g. Sarah Jenkins"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-            <form onSubmit={handleInvite} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Sarah Miller"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
+          <Input
+            label="Work Email"
+            type="email"
+            required
+            placeholder="sarah@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sarah@company.com"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                  Assigned Dynamic Role *
-                </label>
-                <select
-                  value={selectedRoleId}
-                  onChange={(e) => setSelectedRoleId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                >
-                  {roles.map((r) => (
-                    <option key={r._id} value={r._id}>
-                      {r.name} {r.isSystem ? '(System)' : '(Custom)'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={inviting}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-sm shadow-blue-500/20 disabled:opacity-50"
-                >
-                  {inviting ? 'Inviting...' : 'Send Invitation'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          <Select
+            label="Permission Role"
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+          >
+            {roles.map((r) => (
+              <option key={r._id} value={r._id}>
+                {r.name} {r.isSystem ? '(System)' : '(Custom)'}
+              </option>
+            ))}
+          </Select>
+        </form>
+      </Modal>
     </div>
   );
 }
-

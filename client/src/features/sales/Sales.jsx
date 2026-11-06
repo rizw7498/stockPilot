@@ -7,12 +7,19 @@ import {
   Plus,
   CheckCircle,
   Truck,
-  FileText,
-  X,
   Trash2,
-  DollarSign,
   AlertCircle,
+  ChevronRight,
+  Package,
 } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
+import DataTable from '../../components/ui/DataTable';
+import Drawer from '../../components/ui/Drawer';
+import Modal from '../../components/ui/Modal';
+import StatusPill from '../../components/ui/StatusPill';
+import Toolbar from '../../components/ui/Toolbar';
 
 export default function Sales() {
   const { activeOrganization } = useAuth();
@@ -24,8 +31,12 @@ export default function Sales() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // New SO Modal
-  const [newSoModal, setNewSoModal] = useState(false);
+  // Search & Filter
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // New SO Drawer
+  const [newSoDrawer, setNewSoDrawer] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [selectedWarehouse, setSelectedWarehouse] = useState('');
   const [soLines, setSoLines] = useState([{ productId: '', orderedQty: 1, unitPrice: 0 }]);
@@ -38,6 +49,9 @@ export default function Sales() {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [fulfillLines, setFulfillLines] = useState([]);
   const [submittingFulfillment, setSubmittingFulfillment] = useState(false);
+
+  // Order Details Drawer
+  const [viewingOrder, setViewingOrder] = useState(null);
 
   const fetchOrders = async () => {
     try {
@@ -79,8 +93,14 @@ export default function Sales() {
 
     setSelectedCustomer(customers[0]._id);
     setSelectedWarehouse(warehouses.find((w) => w.isDefault)?._id || warehouses[0]?._id);
-    setSoLines([{ productId: products[0]._id, orderedQty: 1, unitPrice: (products[0].priceMinor || 0) / 100 }]);
-    setNewSoModal(true);
+    setSoLines([
+      {
+        productId: products[0]._id,
+        orderedQty: 1,
+        unitPrice: (products[0].priceMinor || 0) / 100,
+      },
+    ]);
+    setNewSoDrawer(true);
   };
 
   const handleAddLine = () => {
@@ -110,6 +130,12 @@ export default function Sales() {
     setSoLines(updated);
   };
 
+  // Live order total
+  const calculatedTotal = soLines.reduce(
+    (acc, line) => acc + (parseFloat(line.orderedQty) || 0) * (parseFloat(line.unitPrice) || 0),
+    0
+  );
+
   const handleCreateSo = async (e) => {
     e.preventDefault();
     setSubmittingSo(true);
@@ -126,10 +152,9 @@ export default function Sales() {
 
       const res = await api.post('/sales-orders', payload);
       if (res.success && res.data._id) {
-        // Automatically confirm and reserve stock
         await api.post(`/sales-orders/${res.data._id}/confirm`);
-        toast.success(`Sales Order ${res.data.orderNumber} confirmed & stock reserved!`);
-        setNewSoModal(false);
+        toast.success(`Sales Order ${res.data.orderNumber} created & stock reserved!`);
+        setNewSoDrawer(false);
         fetchOrders();
       }
     } catch (err) {
@@ -155,9 +180,9 @@ export default function Sales() {
       productId: l.productId?._id || l.productId,
       name: l.productId?.name,
       orderedQty: l.orderedQty,
-      fulfilledQty: l.fulfilledQty,
-      remaining: l.orderedQty - l.fulfilledQty,
-      fulfillAmount: l.orderedQty - l.fulfilledQty,
+      fulfilledQty: l.fulfilledQty || 0,
+      remaining: l.orderedQty - (l.fulfilledQty || 0),
+      fulfillAmount: l.orderedQty - (l.fulfilledQty || 0),
     }));
     setFulfillLines(initLines);
     setTrackingNumber(`TRK-${Date.now().toString().slice(-6)}`);
@@ -177,14 +202,13 @@ export default function Sales() {
         })),
       });
 
-      // Also generate invoice if not yet issued
       try {
         await api.post('/invoices', { salesOrderId: activeOrder._id });
       } catch (e) {
-        // Invoice may already exist
+        // Ignore if invoice already exists
       }
 
-      toast.success('Order dispatched & stock fulfilled!');
+      toast.success('Fulfillment dispatched & inventory updated!');
       setFulfillModal(false);
       fetchOrders();
     } catch (err) {
@@ -199,382 +223,457 @@ export default function Sales() {
     return `${symbol}${(minor / 100).toFixed(2)}`;
   };
 
+  // Filtered orders
+  const filteredOrders = orders.filter((o) => {
+    const matchesSearch =
+      !searchTerm ||
+      o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      o.customerId?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const columns = [
+    {
+      key: 'orderNumber',
+      header: 'Order #',
+      render: (num) => (
+        <span className="mono-chip font-bold text-blue-400">{num}</span>
+      ),
+    },
+    {
+      key: 'customer',
+      header: 'Customer',
+      render: (_, row) => (
+        <div>
+          <div className="font-medium text-slate-100">{row.customerId?.name || 'Walk-in'}</div>
+          {row.customerId?.email && (
+            <div className="text-[11px] text-slate-500 font-mono">{row.customerId?.email}</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'warehouseId',
+      header: 'Warehouse',
+      render: (wh) => (
+        <span className="mono-chip text-slate-300">
+          {wh?.code || 'DEFAULT'}
+        </span>
+      ),
+    },
+    {
+      key: 'createdAt',
+      header: 'Order Date',
+      render: (date) => (
+        <span className="text-xs text-slate-400 font-mono">
+          {new Date(date).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: 'totalAmountMinor',
+      header: 'Total Amount',
+      align: 'right',
+      tabular: true,
+      render: (minor) => (
+        <span className="font-semibold text-slate-100">
+          {formatCurrency(minor)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Fulfillment Status',
+      align: 'center',
+      render: (status) => <StatusPill status={status} />,
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      render: (_, row) => (
+        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+          {row.status === 'DRAFT' && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={CheckCircle}
+              onClick={() => handleConfirmAndReserve(row._id)}
+            >
+              Reserve
+            </Button>
+          )}
+
+          {(row.status === 'RESERVED' || row.status === 'PARTIALLY_DISPATCHED') && (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Truck}
+              onClick={() => handleOpenFulfill(row)}
+            >
+              Dispatch
+            </Button>
+          )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setViewingOrder(row)}
+          >
+            Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Sales Orders</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Order-to-cash workflows, inventory reservations, picking/packing, and shipment dispatch.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+              Sales Orders
+            </h1>
+            <span className="mono-chip text-[11px] text-blue-400">
+              {orders.length} Orders
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            Manage customer sales orders, real-time stock reservations, and carrier shipments.
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          icon={Plus}
           onClick={handleOpenNewSo}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
           Create Sales Order
-        </button>
+        </Button>
       </div>
+
+      {/* Toolbar */}
+      <Toolbar
+        searchQuery={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Filter by order # or customer name... (Press /)"
+        filters={[
+          {
+            id: 'status',
+            label: 'Status',
+            value: statusFilter,
+            options: [
+              { label: 'All Statuses', value: '' },
+              { label: 'Draft', value: 'DRAFT' },
+              { label: 'Reserved', value: 'RESERVED' },
+              { label: 'Partially Dispatched', value: 'PARTIALLY_DISPATCHED' },
+              { label: 'Fulfilled', value: 'FULFILLED' },
+              { label: 'Cancelled', value: 'CANCELLED' },
+            ],
+            onChange: setStatusFilter,
+          },
+        ]}
+      />
 
       {/* Orders Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                <th className="py-3 px-4">Order #</th>
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">Warehouse</th>
-                <th className="py-3 px-4">Items Summary</th>
-                <th className="py-3 px-4 text-right">Order Total</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    Loading sales orders...
-                  </td>
-                </tr>
-              ) : orders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    No sales orders created yet.
-                  </td>
-                </tr>
-              ) : (
-                orders.map((so) => {
-                  const canFulfill =
-                    so.status === 'RESERVED' || so.status === 'PARTIALLY_FULFILLED';
-                  const needsReserve = so.status === 'DRAFT' || so.status === 'CONFIRMED';
+      <DataTable
+        columns={columns}
+        data={filteredOrders}
+        loading={loading}
+        onRowClick={(row) => setViewingOrder(row)}
+        emptyTitle="No sales orders found"
+        emptyDescription="Create your first customer sales order to begin allocating inventory and dispatching goods."
+      />
 
-                  return (
-                    <tr key={so._id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-xs text-blue-600">
-                        {so.orderNumber}
-                      </td>
-                      <td className="py-3.5 px-4 font-semibold text-slate-900">
-                        {so.customerId?.name}
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-slate-600">
-                        {so.warehouseId?.name}
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-slate-500">
-                        {so.lines?.map((l) => `${l.productId?.name} (${l.fulfilledQty}/${l.orderedQty})`).join(', ')}
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-bold text-slate-900">
-                        {formatCurrency(so.totalAmountMinor)}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                            so.status === 'FULFILLED'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : so.status === 'RESERVED'
-                              ? 'bg-blue-100 text-blue-800'
-                              : so.status === 'PARTIALLY_FULFILLED'
-                              ? 'bg-indigo-100 text-indigo-800'
-                              : so.status === 'CANCELLED'
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}
-                        >
-                          {so.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        {needsReserve && (
-                          <button
-                            onClick={() => handleConfirmAndReserve(so._id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-colors cursor-pointer shadow-xs"
-                          >
-                            Reserve Stock
-                          </button>
-                        )}
-                        {canFulfill && (
-                          <button
-                            onClick={() => handleOpenFulfill(so)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors cursor-pointer shadow-xs"
-                          >
-                            <Truck className="w-3.5 h-3.5" />
-                            Dispatch Fulfillment
-                          </button>
-                        )}
-                        {so.status === 'FULFILLED' && (
-                          <span className="text-xs font-semibold text-emerald-600 flex items-center justify-end gap-1">
-                            <CheckCircle className="w-4 h-4" /> Dispatched
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Create Sales Order Drawer (max-w-2xl) */}
+      <Drawer
+        isOpen={newSoDrawer}
+        onClose={() => setNewSoDrawer(false)}
+        width="max-w-2xl"
+        title="Create Sales Order"
+        subtitle="Customer details, fulfillment location, and line items"
+        footer={
+          <div className="w-full flex items-center justify-between">
+            <div className="text-xs">
+              <span className="text-slate-400">Estimated Total: </span>
+              <span className="font-mono text-base font-semibold text-slate-100 ml-1">
+                {activeOrganization?.currency === 'EUR' ? '€' : '$'}
+                {calculatedTotal.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setNewSoDrawer(false)}
+                disabled={submittingSo}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleCreateSo}
+                loading={submittingSo}
+              >
+                Confirm & Reserve Stock
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <form onSubmit={handleCreateSo} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Customer Account"
+              required
+              value={selectedCustomer}
+              onChange={(e) => setSelectedCustomer(e.target.value)}
+            >
+              {customers.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name} ({c.email || 'No email'})
+                </option>
+              ))}
+            </Select>
 
-      {/* New SO Modal */}
-      {newSoModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200">
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Create New Sales Order</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Select customer, warehouse, and products to sell.
-                </p>
-              </div>
-              <button onClick={() => setNewSoModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X className="w-5 h-5" />
-              </button>
+            <Select
+              label="Fulfillment Warehouse"
+              required
+              value={selectedWarehouse}
+              onChange={(e) => setSelectedWarehouse(e.target.value)}
+            >
+              {warehouses.map((w) => (
+                <option key={w._id} value={w._id}>
+                  {w.name} ({w.code})
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Line Items */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-semibold text-slate-200">Order Lines</span>
+              <Button variant="ghost" size="sm" icon={Plus} onClick={handleAddLine}>
+                Add Line
+              </Button>
             </div>
 
-            <form onSubmit={handleCreateSo} className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                    Customer
-                  </label>
-                  <select
-                    value={selectedCustomer}
-                    onChange={(e) => setSelectedCustomer(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                  >
-                    {customers.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name} ({c.email || 'Customer'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="space-y-2">
+              {soLines.map((line, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-xl glass-3 border border-white/5 flex items-center gap-3"
+                >
+                  <div className="flex-1">
+                    <Select
+                      value={line.productId}
+                      onChange={(e) => handleLineProductChange(idx, e.target.value)}
+                    >
+                      {products.map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.sku} - {p.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                    Fulfilling Warehouse
-                  </label>
-                  <select
-                    value={selectedWarehouse}
-                    onChange={(e) => setSelectedWarehouse(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                  >
-                    {warehouses.map((w) => (
-                      <option key={w._id} value={w._id}>
-                        {w.name} ({w.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                  <div className="w-24">
+                    <Input
+                      type="number"
+                      min="1"
+                      placeholder="Qty"
+                      value={line.orderedQty}
+                      onChange={(e) => {
+                        const updated = [...soLines];
+                        updated[idx].orderedQty = e.target.value;
+                        setSoLines(updated);
+                      }}
+                    />
+                  </div>
 
-              {/* Order Lines */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase text-slate-700 tracking-wider">
-                    Order Items
-                  </span>
+                  <div className="w-28">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Price"
+                      value={line.unitPrice}
+                      onChange={(e) => {
+                        const updated = [...soLines];
+                        updated[idx].unitPrice = e.target.value;
+                        setSoLines(updated);
+                      }}
+                    />
+                  </div>
+
                   <button
                     type="button"
-                    onClick={handleAddLine}
-                    className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                    onClick={() => handleRemoveLine(idx)}
+                    disabled={soLines.length === 1}
+                    className="p-2 text-slate-500 hover:text-rose-400 disabled:opacity-30 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Add Item
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-
-                {soLines.map((line, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        Product
-                      </label>
-                      <select
-                        value={line.productId}
-                        onChange={(e) => handleLineProductChange(idx, e.target.value)}
-                        className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-                      >
-                        {products.map((p) => (
-                          <option key={p._id} value={p._id}>
-                            {p.name} [{p.sku}]
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="w-24">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        Quantity
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        required
-                        value={line.orderedQty}
-                        onChange={(e) => {
-                          const updated = [...soLines];
-                          updated[idx].orderedQty = e.target.value;
-                          setSoLines(updated);
-                        }}
-                        className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white text-center focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
-
-                    <div className="w-28">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        Sale Price ($)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        required
-                        value={line.unitPrice}
-                        onChange={(e) => {
-                          const updated = [...soLines];
-                          updated[idx].unitPrice = e.target.value;
-                          setSoLines(updated);
-                        }}
-                        className="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs bg-white text-right focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
-
-                    {soLines.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveLine(idx)}
-                        className="mt-4 text-slate-400 hover:text-rose-600 p-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setNewSoModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingSo}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-sm shadow-blue-500/20 disabled:opacity-50"
-                >
-                  {submittingSo ? 'Creating Order...' : 'Confirm Order & Reserve'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Fulfill Modal */}
-      {fulfillModal && activeOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-              <div>
-                <h3 className="font-bold text-slate-900 text-base">Dispatch Order Fulfillment</h3>
-                <span className="text-xs font-mono text-blue-600 font-bold">
-                  {activeOrder.orderNumber} • {activeOrder.customerId?.name}
-                </span>
-              </div>
-              <button onClick={() => setFulfillModal(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X className="w-5 h-5" />
-              </button>
+              ))}
             </div>
+          </div>
+        </form>
+      </Drawer>
 
-            <form onSubmit={handlePostFulfillment} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+      {/* Dispatch / Fulfillment Modal */}
+      <Modal
+        isOpen={fulfillModal}
+        onClose={() => setFulfillModal(false)}
+        maxWidth="max-w-xl"
+        title={`Dispatch Order: ${activeOrder?.orderNumber}`}
+        subtitle="Record carrier tracking and decrement reserved warehouse inventory"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setFulfillModal(false)}
+              disabled={submittingFulfillment}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handlePostFulfillment}
+              loading={submittingFulfillment}
+            >
+              Confirm Dispatch
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handlePostFulfillment} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Shipping Carrier"
+              value={carrier}
+              onChange={(e) => setCarrier(e.target.value)}
+            >
+              <option value="DHL Express">DHL Express</option>
+              <option value="FedEx Ground">FedEx Ground</option>
+              <option value="UPS Next Day">UPS Next Day</option>
+              <option value="Local Courier">Local Delivery Fleet</option>
+            </Select>
+
+            <Input
+              label="Tracking Number"
+              value={trackingNumber}
+              onChange={(e) => setTrackingNumber(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <div className="text-[12px] font-semibold text-slate-200">
+              Line Dispatch Allocation
+            </div>
+            {fulfillLines.map((line, idx) => (
+              <div
+                key={idx}
+                className="p-3 rounded-lg glass-3 border border-white/5 flex items-center justify-between gap-4"
+              >
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-600 mb-1">
-                    Carrier / Logistics
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={carrier}
-                    onChange={(e) => setCarrier(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                  <div className="text-xs font-medium text-slate-200">{line.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    Ordered: {line.orderedQty} | Remaining: {line.remaining}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-600 mb-1">
-                    Tracking Number
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-xs bg-white font-mono focus:ring-2 focus:ring-blue-500 outline-none"
+
+                <div className="w-24">
+                  <Input
+                    type="number"
+                    max={line.remaining}
+                    min="1"
+                    value={line.fulfillAmount}
+                    onChange={(e) => {
+                      const updated = [...fulfillLines];
+                      updated[idx].fulfillAmount = e.target.value;
+                      setFulfillLines(updated);
+                    }}
                   />
                 </div>
               </div>
+            ))}
+          </div>
+        </form>
+      </Modal>
 
-              <div className="space-y-3 pt-2">
-                <span className="text-xs font-bold uppercase text-slate-700 tracking-wider block">
-                  Items to Dispatch
-                </span>
-                {fulfillLines.map((line, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-xs text-slate-800 block">{line.name}</span>
-                      <span className="text-[11px] text-slate-500">
-                        Remaining: {line.remaining}
-                      </span>
+      {/* Order Details Drawer */}
+      <Drawer
+        isOpen={Boolean(viewingOrder)}
+        onClose={() => setViewingOrder(null)}
+        width="max-w-md"
+        title={`Sales Order ${viewingOrder?.orderNumber}`}
+        subtitle={`Created on ${new Date(viewingOrder?.createdAt || Date.now()).toLocaleDateString()}`}
+        footer={
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setViewingOrder(null)}
+            className="w-full"
+          >
+            Close
+          </Button>
+        }
+      >
+        <div className="space-y-6">
+          <div className="p-4 rounded-xl glass-3 border border-white/5 space-y-3">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">Customer:</span>
+              <span className="font-semibold text-slate-200">
+                {viewingOrder?.customerId?.name || 'Walk-in'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">Warehouse:</span>
+              <span className="mono-chip text-slate-300">
+                {viewingOrder?.warehouseId?.name}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">Total Value:</span>
+              <span className="font-mono font-semibold text-slate-100 text-sm">
+                {formatCurrency(viewingOrder?.totalAmountMinor)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">Fulfillment Status:</span>
+              <StatusPill status={viewingOrder?.status} />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="text-[12px] font-semibold text-slate-200">Order Lines</div>
+            <div className="space-y-2">
+              {viewingOrder?.lines?.map((line, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg glass-3 border border-white/5 flex items-center justify-between text-xs"
+                >
+                  <div>
+                    <div className="font-medium text-slate-200">
+                      {line.productId?.name || 'Product Item'}
                     </div>
-
-                    <div className="w-24">
-                      <input
-                        type="number"
-                        min="1"
-                        max={line.remaining}
-                        required
-                        value={line.fulfillAmount}
-                        onChange={(e) => {
-                          const updated = [...fulfillLines];
-                          updated[idx].fulfillAmount = e.target.value;
-                          setFulfillLines(updated);
-                        }}
-                        className="w-full border border-slate-300 rounded-lg px-2.5 py-1 text-xs bg-white text-center font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      {line.orderedQty} units @ {formatCurrency(line.unitPriceMinor)}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setFulfillModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingFulfillment}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-sm shadow-emerald-500/20 disabled:opacity-50"
-                >
-                  {submittingFulfillment ? 'Fulfilling...' : 'Confirm Dispatch'}
-                </button>
-              </div>
-            </form>
+                  <div className="font-mono font-semibold text-slate-100">
+                    {formatCurrency(line.orderedQty * line.unitPriceMinor)}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      </Drawer>
     </div>
   );
 }
-

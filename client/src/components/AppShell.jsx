@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../app/AuthContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import CommandPalette from './ui/CommandPalette';
 
 export default function AppShell() {
   const { user, loading } = useAuth();
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    function handleGlobalKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-50 text-slate-500 gap-3">
-        <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">Loading StockPilot...</span>
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#070B14] text-slate-400 gap-3">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-mono uppercase tracking-widest text-slate-500">
+          Loading StockPilot...
+        </span>
       </div>
     );
   }
@@ -21,15 +36,27 @@ export default function AppShell() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#070B14] text-slate-100 overflow-hidden font-sans relative app-atmosphere">
+      {/* SVG Grain Overlay */}
+      <div className="app-grain" />
+
+      {/* Navigation Rail / Sidebar */}
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-8">
+
+      {/* Main Workspace Frame */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        <Header onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto px-6 py-6 max-w-[1440px] w-full mx-auto">
           <Outlet />
         </main>
       </div>
+
+      {/* Global Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
     </div>
   );
 }
-

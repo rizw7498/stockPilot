@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../app/AuthContext';
 import { useToast } from '../../app/ToastContext';
-import { BarChart3, Boxes, DollarSign, Download } from 'lucide-react';
+import { BarChart3, Boxes, DollarSign, Download, RefreshCw } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import KpiCard from '../../components/ui/KpiCard';
+import DataTable from '../../components/ui/DataTable';
 
 export default function Reports() {
   const { activeOrganization } = useAuth();
@@ -34,112 +37,112 @@ export default function Reports() {
     })}`;
   };
 
+  const columns = [
+    {
+      key: 'sku',
+      header: 'SKU',
+      render: (sku) => <span className="mono-chip font-bold text-blue-400">{sku}</span>,
+    },
+    {
+      key: 'productName',
+      header: 'Product Name',
+      render: (name) => <span className="font-semibold text-slate-100">{name}</span>,
+    },
+    {
+      key: 'warehouse',
+      header: 'Warehouse',
+      render: (wh) => <span className="mono-chip text-slate-300">{wh}</span>,
+    },
+    {
+      key: 'onHand',
+      header: 'On Hand',
+      align: 'right',
+      tabular: true,
+      render: (qty) => <span className="font-semibold text-slate-100">{qty}</span>,
+    },
+    {
+      key: 'reserved',
+      header: 'Reserved',
+      align: 'right',
+      tabular: true,
+      render: (qty) => <span className="font-semibold text-amber-400">{qty}</span>,
+    },
+    {
+      key: 'available',
+      header: 'Available',
+      align: 'right',
+      tabular: true,
+      render: (qty) => <span className="font-semibold text-emerald-400">{qty}</span>,
+    },
+    {
+      key: 'unitCostMinor',
+      header: 'FIFO Unit Cost',
+      align: 'right',
+      tabular: true,
+      render: (cost) => <span className="font-mono text-slate-300">{formatCurrency(cost)}</span>,
+    },
+    {
+      key: 'totalValuationMinor',
+      header: 'Position Valuation',
+      align: 'right',
+      tabular: true,
+      render: (val) => (
+        <span className="font-mono font-bold text-slate-100">{formatCurrency(val)}</span>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Inventory Valuation Report
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Product cost-basis valuation breakdown across physical warehouses.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+              Inventory Valuation Report
+            </h1>
+            <span className="mono-chip text-[11px] text-blue-400">
+              FIFO Cost Basis
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            Detailed asset breakdown across active warehouse facilities and current stock balances.
           </p>
         </div>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={RefreshCw}
+          onClick={fetchValuation}
+        >
+          Recalculate
+        </Button>
       </div>
 
-      {/* Summary KPI Cards */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-              Total Inventory Valuation
-            </span>
-            <span className="text-2xl font-extrabold text-slate-900">
-              {formatCurrency(report?.totalValuationMinor)}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Boxes className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-              Total Physical Units On Hand
-            </span>
-            <span className="text-2xl font-extrabold text-slate-900">
-              {report?.totalOnHandUnits || 0} Units
-            </span>
-          </div>
-        </div>
+        <KpiCard
+          label="Total Inventory Valuation"
+          value={formatCurrency(report?.totalValuationMinor)}
+          subvalue="Aggregate FIFO asset value across all sites"
+          icon={DollarSign}
+        />
+        <KpiCard
+          label="Total Physical Units"
+          value={`${report?.totalOnHandUnits || 0} Units`}
+          subvalue="Combined on-hand stock count"
+          icon={Boxes}
+        />
       </div>
 
       {/* Valuation Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <th className="py-3 px-4">SKU</th>
-              <th className="py-3 px-4">Product Name</th>
-              <th className="py-3 px-4">Warehouse</th>
-              <th className="py-3 px-4 text-center">OnHand</th>
-              <th className="py-3 px-4 text-center">Reserved</th>
-              <th className="py-3 px-4 text-center">Available</th>
-              <th className="py-3 px-4 text-right">Unit Cost</th>
-              <th className="py-3 px-4 text-right">Total Valuation</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {loading ? (
-              <tr>
-                <td colSpan={8} className="py-12 text-center text-slate-400">
-                  Calculating valuation...
-                </td>
-              </tr>
-            ) : !report?.items || report.items.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="py-12 text-center text-slate-400">
-                  No inventory balances recorded to value.
-                </td>
-              </tr>
-            ) : (
-              report.items.map((item) => (
-                <tr key={item.balanceId} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-xs text-blue-600">
-                    {item.product?.sku}
-                  </td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-900">
-                    {item.product?.name}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-slate-600">
-                    {item.warehouse?.name}
-                  </td>
-                  <td className="py-3.5 px-4 text-center font-bold text-slate-900">
-                    {item.onHand} {item.product?.unit}
-                  </td>
-                  <td className="py-3.5 px-4 text-center text-indigo-600 font-medium">
-                    {item.reserved}
-                  </td>
-                  <td className="py-3.5 px-4 text-center text-emerald-700 font-bold">
-                    {item.available}
-                  </td>
-                  <td className="py-3.5 px-4 text-right font-medium text-slate-600">
-                    {formatCurrency(item.unitCostMinor)}
-                  </td>
-                  <td className="py-3.5 px-4 text-right font-extrabold text-slate-900">
-                    {formatCurrency(item.valuationMinor)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={report?.positions || []}
+        loading={loading}
+        emptyTitle="No valuation records found"
+        emptyDescription="Inventory positions with recorded cost prices will automatically aggregate here."
+      />
     </div>
   );
 }
-

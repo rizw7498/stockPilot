@@ -7,13 +7,23 @@ import {
   Plus,
   Edit2,
   Trash2,
+  Lock,
+  Search,
+  Check,
   CheckSquare,
   Square,
-  Lock,
   ShieldAlert,
-  X,
-  Search,
+  Copy,
+  ChevronRight,
+  Filter,
 } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import GlassCard from '../../components/ui/GlassCard';
+import Modal from '../../components/ui/Modal';
+import ConfirmModal from '../../components/ui/ConfirmModal';
+import Skeleton from '../../components/ui/Skeleton';
+import Tooltip from '../../components/ui/Tooltip';
 
 export default function Roles() {
   const { user } = useAuth();
@@ -22,14 +32,20 @@ export default function Roles() {
   const [roles, setRoles] = useState([]);
   const [catalog, setCatalog] = useState({ modules: {}, allPermissions: [] });
   const [loading, setLoading] = useState(true);
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
 
-  // Modal State
+  // Edit / Create Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [roleName, setRoleName] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [saving, setSaving] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
+
+  // Delete Confirm Modal State
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchRolesAndCatalog = async () => {
     try {
@@ -39,7 +55,12 @@ export default function Roles() {
         api.get('/roles/permissions-catalog'),
       ]);
 
-      if (rolesRes.success) setRoles(rolesRes.data);
+      if (rolesRes.success) {
+        setRoles(rolesRes.data);
+        if (rolesRes.data.length > 0 && !selectedRoleId) {
+          setSelectedRoleId(rolesRes.data[0]._id);
+        }
+      }
       if (catRes.success) setCatalog(catRes.data);
     } catch (err) {
       toast.error(err.message || 'Failed to load roles and permissions');
@@ -52,6 +73,9 @@ export default function Roles() {
     fetchRolesAndCatalog();
   }, []);
 
+  const selectedRole = roles.find((r) => r._id === selectedRoleId) || roles[0];
+  const totalCatalogPerms = catalog.allPermissions?.length || 46;
+
   const openCreateModal = () => {
     setEditingRole(null);
     setRoleName('');
@@ -63,6 +87,13 @@ export default function Roles() {
     setEditingRole(role);
     setRoleName(role.name);
     setSelectedPermissions(role.permissions || []);
+    setModalOpen(true);
+  };
+
+  const handleDuplicate = (role) => {
+    setEditingRole(null);
+    setRoleName(`${role.name} (Copy)`);
+    setSelectedPermissions([...(role.permissions || [])]);
     setModalOpen(true);
   };
 
@@ -106,11 +137,12 @@ export default function Roles() {
         });
         toast.success(`Role "${roleName}" updated successfully!`);
       } else {
-        await api.post('/roles', {
+        const res = await api.post('/roles', {
           name: roleName.trim(),
           permissions: selectedPermissions,
         });
         toast.success(`Role "${roleName}" created successfully!`);
+        if (res.data?._id) setSelectedRoleId(res.data._id);
       }
       setModalOpen(false);
       fetchRolesAndCatalog();
@@ -121,28 +153,41 @@ export default function Roles() {
     }
   };
 
-  const handleDeleteRole = async (role) => {
-    if (role.isSystem && !user?.isSuperAdmin) {
-      toast.error('System roles cannot be deleted');
-      return;
-    }
-    if (!window.confirm(`Are you sure you want to delete the role "${role.name}"?`)) {
-      return;
-    }
+  const confirmDeleteRole = (role) => {
+    setRoleToDelete(role);
+    setDeleteConfirmOpen(true);
+  };
 
+  const handleDeleteRole = async () => {
+    if (!roleToDelete) return;
+    setDeleting(true);
     try {
-      await api.delete(`/roles/${role._id}`);
-      toast.success(`Role "${role.name}" removed successfully`);
+      await api.delete(`/roles/${roleToDelete._id}`);
+      toast.success(`Role "${roleToDelete.name}" removed successfully`);
+      setDeleteConfirmOpen(false);
+      setRoleToDelete(null);
       fetchRolesAndCatalog();
     } catch (err) {
       toast.error(err.message || 'Failed to delete role');
+    } finally {
+      setDeleting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-6">
+        <Skeleton variant="text" width="220px" height="28px" />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <div className="md:col-span-4 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} height="64px" />
+            ))}
+          </div>
+          <div className="md:col-span-8">
+            <Skeleton height="380px" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -150,241 +195,390 @@ export default function Roles() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
               Roles & Permissions
             </h1>
-            <span className="bg-blue-100 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded-full">
-              Dynamic RBAC
-            </span>
+            <span className="mono-chip text-[11px] text-blue-400">Dynamic RBAC</span>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Create custom granular roles with fine-grained access control across modules.
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            Configure dynamic roles, module capabilities, and tenant-scoped security policies.
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          icon={Plus}
           onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          Create Dynamic Role
-        </button>
+          Create Role
+        </Button>
       </div>
 
-      {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {roles.map((r) => (
-          <div
-            key={r._id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 flex flex-col justify-between hover:border-slate-300 transition-all"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <h3 className="font-bold text-slate-900 text-base">{r.name}</h3>
-                </div>
-                {r.isSystem ? (
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> System
-                  </span>
-                ) : (
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    Custom
-                  </span>
-                )}
-              </div>
-
-              <div className="text-xs text-slate-500 mb-4">
-                Granted <span className="font-bold text-slate-800">{r.permissions?.length || 0}</span> permission keys.
-              </div>
-
-              {/* Permission pill tags */}
-              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1 bg-slate-50 rounded-xl border border-slate-100">
-                {r.permissions?.slice(0, 8).map((perm, pIdx) => (
-                  <span
-                    key={pIdx}
-                    className="text-[10px] font-medium bg-white text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md"
-                  >
-                    {perm}
-                  </span>
-                ))}
-                {(r.permissions?.length || 0) > 8 && (
-                  <span className="text-[10px] font-bold text-blue-600 px-1 py-0.5">
-                    +{r.permissions.length - 8} more...
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-4 mt-4 border-t border-slate-100">
-              <button
-                onClick={() => openEditModal(r)}
-                className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                Configure
-              </button>
-
-              {!r.isSystem && (
-                <button
-                  onClick={() => handleDeleteRole(r)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete
-                </button>
-              )}
-            </div>
+      {/* Master-Detail Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left: Role List (4 cols) */}
+        <div className="lg:col-span-4 space-y-3">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-1">
+            Available Roles ({roles.length})
           </div>
-        ))}
-      </div>
 
-      {/* Role Creation / Edit Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 animate-in fade-in duration-200">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  {editingRole ? `Edit Role: ${editingRole.name}` : 'Create Dynamic Custom Role'}
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Assign granular functional permissions to this role.
-                </p>
-              </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="space-y-2">
+            {roles.map((r) => {
+              const isSelected = selectedRole?._id === r._id;
+              const permCount = r.permissions?.length || 0;
 
-            {/* Modal Form */}
-            <form onSubmit={handleSaveRole} className="flex-1 flex flex-col overflow-hidden">
-              <div className="p-6 space-y-5 overflow-y-auto flex-1">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1.5">
-                    Role Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={roleName}
-                    disabled={editingRole?.isSystem && !user?.isSuperAdmin}
-                    onChange={(e) => setRoleName(e.target.value)}
-                    placeholder="e.g. Regional Warehouse Auditor"
-                    className="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              return (
+                <div
+                  key={r._id}
+                  onClick={() => setSelectedRoleId(r._id)}
+                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between group ${
+                    isSelected
+                      ? 'glass-2 border-blue-500/50 bg-blue-500/[0.08] shadow-sm'
+                      : 'glass-3 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${
+                        r.isSystem
+                          ? 'bg-slate-800 border-white/10 text-slate-400'
+                          : 'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                      }`}
+                    >
+                      {r.isSystem ? <Lock className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-semibold text-slate-100 truncate">
+                          {r.name}
+                        </span>
+                        {r.isSystem && (
+                          <span className="mono-chip text-[9px] text-slate-400">
+                            System
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                        {permCount} / {totalCatalogPerms} capabilities
+                      </div>
+                    </div>
+                  </div>
+
+                  <ChevronRight
+                    className={`w-4 h-4 transition-transform ${
+                      isSelected
+                        ? 'text-blue-400 translate-x-0.5'
+                        : 'text-slate-500 group-hover:text-slate-300'
+                    }`}
                   />
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
+        {/* Right: Selected Role Detail Panel & Matrix (8 cols) */}
+        <div className="lg:col-span-8">
+          {selectedRole ? (
+            <GlassCard
+              title={
+                <div className="flex items-center gap-2.5">
+                  <span>{selectedRole.name}</span>
+                  {selectedRole.isSystem ? (
+                    <span className="mono-chip text-[10px] text-slate-400 flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> System Managed
+                    </span>
+                  ) : (
+                    <span className="mono-chip text-[10px] text-emerald-400">
+                      Custom Tenant Role
+                    </span>
+                  )}
+                </div>
+              }
+              subtitle="Assigned permissions and functional operational limits"
+              headerAction={
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={Copy}
+                    onClick={() => handleDuplicate(selectedRole)}
+                  >
+                    Duplicate
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={Edit2}
+                    onClick={() => openEditModal(selectedRole)}
+                  >
+                    Configure
+                  </Button>
+                  {!selectedRole.isSystem && (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
+                      onClick={() => confirmDeleteRole(selectedRole)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </div>
+              }
+              padding="p-6"
+            >
+              {/* Coverage Ring & Summary */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-xl glass-3 border border-white/5 mb-6">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold uppercase text-slate-700 tracking-wider block">
-                      Permissions Matrix ({selectedPermissions.length} selected)
-                    </label>
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                    Permission Coverage
+                  </div>
+                  <div className="text-[26px] font-semibold text-slate-100 font-mono tracking-tight mt-0.5">
+                    {selectedRole.permissions?.length || 0}{' '}
+                    <span className="text-slate-500 text-sm">/ {totalCatalogPerms}</span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="flex-1 max-w-xs space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                    <span>Coverage Rate</span>
+                    <span>
+                      {Math.round(
+                        ((selectedRole.permissions?.length || 0) / (totalCatalogPerms || 1)) * 100
+                      )}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden border border-white/5">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            ((selectedRole.permissions?.length || 0) / (totalCatalogPerms || 1)) * 100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Module Capabilities Matrix breakdown */}
+              <div className="space-y-4">
+                <div className="text-[12px] font-semibold text-slate-200">
+                  Assigned Module Matrix
+                </div>
+
+                <div className="space-y-3">
+                  {Object.entries(catalog.modules || {}).map(([moduleName, perms]) => {
+                    const assignedInModule = perms.filter((p) =>
+                      selectedRole.permissions?.includes(p)
+                    );
+                    const isAll = assignedInModule.length === perms.length && perms.length > 0;
+                    const isNone = assignedInModule.length === 0;
+
+                    return (
+                      <div
+                        key={moduleName}
+                        className="p-3.5 rounded-lg border border-white/5 bg-white/[0.01] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="space-y-1 min-w-[140px]">
+                          <div className="text-[12px] font-semibold text-slate-200 capitalize">
+                            {moduleName}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            {assignedInModule.length} of {perms.length} active
+                          </div>
+                        </div>
+
+                        {/* Pills of assigned permissions */}
+                        <div className="flex-1 flex flex-wrap gap-1.5">
+                          {isNone ? (
+                            <span className="text-[11px] text-slate-500 italic">
+                              No permissions granted in this domain
+                            </span>
+                          ) : (
+                            perms.map((p) => {
+                              const active = selectedRole.permissions?.includes(p);
+                              return (
+                                <span
+                                  key={p}
+                                  className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-all ${
+                                    active
+                                      ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                                      : 'bg-white/[0.02] text-slate-600 border-white/5 line-through opacity-40'
+                                  }`}
+                                >
+                                  {p.split(':')[1] || p}
+                                </span>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </GlassCard>
+          ) : (
+            <div className="glass-2 rounded-xl p-12 text-center text-slate-400">
+              Select a role to inspect its permissions.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Role Create / Edit Modal (Max-w-4xl Matrix Editor) */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        maxWidth="max-w-4xl"
+        title={editingRole ? `Configure Role: ${editingRole.name}` : 'Create Dynamic Role'}
+        subtitle="Grant granular read, write, execution, and admin capabilities"
+        footer={
+          <>
+            <div className="text-xs text-slate-400 font-mono mr-auto">
+              Selected: {selectedPermissions.length} / {totalCatalogPerms}
+            </div>
+            <Button
+              variant="ghost"
+              onClick={() => setModalOpen(false)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveRole}
+              loading={saving}
+            >
+              {editingRole ? 'Save Changes' : 'Create Role'}
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleSaveRole} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Role Name"
+              required
+              placeholder="e.g. Inventory Supervisor, Billing Clerk"
+              value={roleName}
+              onChange={(e) => setRoleName(e.target.value)}
+              disabled={editingRole?.isSystem && !user?.isSuperAdmin}
+            />
+
+            <Input
+              label="Search Permissions"
+              icon={Search}
+              placeholder="Filter by keyword (e.g. read, delete, stock)..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+            />
+          </div>
+
+          {/* Module Permission Matrix */}
+          <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+            {Object.entries(catalog.modules || {}).map(([moduleName, perms]) => {
+              const filteredPerms = perms.filter(
+                (p) =>
+                  !searchFilter.trim() ||
+                  p.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                  moduleName.toLowerCase().includes(searchFilter.toLowerCase())
+              );
+
+              if (filteredPerms.length === 0) return null;
+
+              const allModuleSelected = perms.every((p) => selectedPermissions.includes(p));
+              const someModuleSelected =
+                perms.some((p) => selectedPermissions.includes(p)) && !allModuleSelected;
+
+              return (
+                <div
+                  key={moduleName}
+                  className="p-4 rounded-xl glass-3 border border-white/5 space-y-3"
+                >
+                  <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-semibold text-slate-100 capitalize">
+                        {moduleName} Module
+                      </span>
+                      <span className="mono-chip text-[10px] text-slate-400">
+                        {perms.length} actions
+                      </span>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() =>
-                        setSelectedPermissions(
-                          selectedPermissions.length === catalog.allPermissions.length
-                            ? []
-                            : [...catalog.allPermissions]
-                        )
-                      }
-                      className="text-xs text-blue-600 hover:underline font-semibold cursor-pointer"
+                      onClick={() => toggleModulePermissions(moduleName)}
+                      className="text-[11px] font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
                     >
-                      {selectedPermissions.length === catalog.allPermissions.length
-                        ? 'Deselect All'
-                        : 'Select All Permissions'}
+                      {allModuleSelected ? (
+                        <>
+                          <CheckSquare className="w-3.5 h-3.5 text-blue-400" />
+                          <span>Deselect all</span>
+                        </>
+                      ) : (
+                        <>
+                          <Square className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Select all</span>
+                        </>
+                      )}
                     </button>
                   </div>
 
-                  {/* Modules Accordion */}
-                  <div className="space-y-4">
-                    {Object.entries(catalog.modules).map(([moduleName, perms]) => {
-                      const allModuleSelected = perms.every((p) => selectedPermissions.includes(p));
-                      const someModuleSelected =
-                        perms.some((p) => selectedPermissions.includes(p)) && !allModuleSelected;
-
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    {filteredPerms.map((perm) => {
+                      const isChecked = selectedPermissions.includes(perm);
                       return (
                         <div
-                          key={moduleName}
-                          className="border border-slate-200 rounded-xl p-4 bg-slate-50/50"
+                          key={perm}
+                          onClick={() => togglePermission(perm)}
+                          className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                            isChecked
+                              ? 'bg-blue-500/15 border-blue-500/40 text-blue-200 font-medium'
+                              : 'bg-white/[0.02] border-white/5 text-slate-400 hover:border-white/10 hover:text-slate-200'
+                          }`}
                         >
-                          <div className="flex items-center justify-between mb-2.5">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
-                              {moduleName} Module
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => toggleModulePermissions(moduleName)}
-                              className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
-                            >
-                              {allModuleSelected ? 'Uncheck Group' : 'Check All Group'}
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {perms.map((perm) => {
-                              const isChecked = selectedPermissions.includes(perm);
-                              return (
-                                <button
-                                  type="button"
-                                  key={perm}
-                                  onClick={() => togglePermission(perm)}
-                                  className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium text-left transition-colors cursor-pointer border ${
-                                    isChecked
-                                      ? 'bg-blue-50 text-blue-900 border-blue-200 font-semibold'
-                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100/80'
-                                  }`}
-                                >
-                                  {isChecked ? (
-                                    <CheckSquare className="w-4 h-4 text-blue-600 shrink-0" />
-                                  ) : (
-                                    <Square className="w-4 h-4 text-slate-400 shrink-0" />
-                                  )}
-                                  <span className="truncate">{perm}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => {}}
+                            className="rounded border-white/20 bg-slate-900 text-blue-500 focus:ring-0 cursor-pointer h-3.5 w-3.5 shrink-0"
+                          />
+                          <span className="font-mono text-[11px] truncate" title={perm}>
+                            {perm}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-sm shadow-blue-500/20 disabled:opacity-50 transition-colors cursor-pointer"
-                >
-                  {saving ? 'Saving Role...' : 'Save Role Permissions'}
-                </button>
-              </div>
-            </form>
+              );
+            })}
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteRole}
+        loading={deleting}
+        title="Delete Dynamic Role"
+        message={`Are you sure you want to permanently remove the role "${roleToDelete?.name}"? Any users assigned to this role must be reassigned.`}
+      />
     </div>
   );
 }
-

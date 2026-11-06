@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/AuthContext';
 import { useToast } from '../../app/ToastContext';
-import { Building2, User, Mail, Lock, DollarSign, ArrowRight } from 'lucide-react';
+import { Building2, User, Mail, Lock, DollarSign, ArrowRight, Boxes, CheckCircle2 } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -19,10 +22,14 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.email || !formData.password || !formData.organizationName) {
+      toast.error('All fields are required');
+      return;
+    }
     setLoading(true);
     try {
       await register(formData);
-      toast.success('Organization and account registered successfully!');
+      toast.success('Organization registered successfully!');
       navigate('/');
     } catch (err) {
       toast.error(err.message || 'Registration failed');
@@ -32,63 +39,89 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-blue-500/20 mb-4">
-          SP
-        </div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">Register New Organization</h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Create your tenant workspace with default warehouse & roles
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col justify-center relative overflow-hidden app-atmosphere py-12">
+      {/* SVG Grain Overlay */}
+      <div className="app-grain" />
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-slate-800/90 backdrop-blur-md py-8 px-6 shadow-2xl rounded-2xl border border-slate-700/80 sm:px-10">
-          <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="relative z-10 max-w-5xl w-full mx-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        {/* Left Branding Panel */}
+        <div className="md:col-span-6 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold text-sm shadow-inner">
+              <Boxes className="w-5 h-5 text-blue-400" />
+            </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Organization / Company Name
-              </label>
-              <div className="relative">
-                <Building2 className="w-5 h-5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type="text"
-                  required
-                  value={formData.organizationName}
-                  onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
-                  placeholder="Apex Global Corp"
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
+              <div className="text-xl font-bold tracking-tight text-slate-100">StockPilot</div>
+              <div className="text-[11px] text-slate-400 font-mono uppercase tracking-wider">
+                Enterprise Inventory Engine
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-slate-100 leading-tight">
+              Launch Your Enterprise Workspace
+            </h1>
+            <p className="text-sm text-slate-400 leading-relaxed max-w-lg">
+              Set up your organization tenant, default warehouse depot, and dynamic role permissions in under 30 seconds.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-slate-200">Automated Provisioning</div>
+                <div className="text-[11px] text-slate-400">Default warehouse, standard roles, and ledger initialized instantly</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Your Full Name
-                </label>
-                <div className="relative">
-                  <User className="w-5 h-5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Alex Johnson"
-                    className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                </div>
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Currency
-                </label>
-                <select
+                <div className="text-xs font-semibold text-slate-200">Double-Entry Verification</div>
+                <div className="text-[11px] text-slate-400">Strict transactional audit protection against balance drifts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Glass Card Form */}
+        <div className="md:col-span-6">
+          <div className="glass-overlay rounded-2xl border border-white/10 p-8 shadow-2xl space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-100 tracking-tight">Register Organization</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Create your tenant credentials and workspace settings</p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <Input
+                label="Organization / Company Name"
+                required
+                icon={Building2}
+                placeholder="Apex Logistics Corp"
+                value={formData.organizationName}
+                onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Your Full Name"
+                  required
+                  icon={User}
+                  placeholder="Alex Johnson"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+
+                <Select
+                  label="Workspace Currency"
                   value={formData.currency}
                   onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -96,69 +129,49 @@ export default function Register() {
                   <option value="PKR">PKR (₨)</option>
                   <option value="INR">INR (₹)</option>
                   <option value="AED">AED (د.إ)</option>
-                </select>
+                </Select>
               </div>
+
+              <Input
+                label="Work Email Address"
+                type="email"
+                required
+                icon={Mail}
+                placeholder="alex@apexcorp.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                required
+                icon={Lock}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={loading}
+                className="w-full mt-2"
+              >
+                Create Tenant Account <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </form>
+
+            <div className="pt-4 border-t border-white/5 text-center text-xs text-slate-400">
+              Already have an organization account?{' '}
+              <Link to="/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+                Sign In
+              </Link>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Work Email Address
-              </label>
-              <div className="relative">
-                <Mail className="w-5 h-5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="alex@apex.com"
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Secure Password
-              </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-                <input
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Minimum 6 characters"
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-3 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition-all shadow-md shadow-blue-600/30 disabled:opacity-50 cursor-pointer"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Create Workspace & Sign In</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-slate-400 border-t border-slate-700/60 pt-4">
-            Already registered?{' '}
-            <Link to="/login" className="text-blue-400 hover:text-blue-300 font-semibold underline">
-              Sign In
-            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

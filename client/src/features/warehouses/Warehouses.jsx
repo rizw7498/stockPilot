@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useToast } from '../../app/ToastContext';
-import { Warehouse as WarehouseIcon, Plus, X, Check, MapPin, Phone, Mail } from 'lucide-react';
+import { Warehouse as WarehouseIcon, Plus, MapPin, Phone, Mail, CheckCircle } from 'lucide-react';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Modal from '../../components/ui/Modal';
+import GlassCard from '../../components/ui/GlassCard';
+import StatusPill from '../../components/ui/StatusPill';
 
 export default function Warehouses() {
   const toast = useToast();
@@ -39,6 +44,11 @@ export default function Warehouses() {
 
   const handleCreateWarehouse = async (e) => {
     e.preventDefault();
+    if (!formData.code || !formData.name) {
+      toast.error('Code and Name are required');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await api.post('/warehouses', {
@@ -66,15 +76,25 @@ export default function Warehouses() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Warehouse Locations</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage multi-site storage facilities, fulfillment depots, and default shipping points.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[22px] font-semibold tracking-tight text-slate-100">
+              Warehouses & Depots
+            </h1>
+            <span className="mono-chip text-[11px] text-blue-400">
+              {warehouses.length} Locations
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            Manage multi-site storage facilities, fulfillment depots, and default dispatch hubs.
           </p>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          icon={Plus}
           onClick={() => {
             setFormData({
               code: '',
@@ -85,193 +105,167 @@ export default function Warehouses() {
               country: '',
               contactPhone: '',
               contactEmail: '',
-              isDefault: false,
+              isDefault: warehouses.length === 0,
             });
             setModalOpen(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
           Add Warehouse
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {warehouses.map((w) => (
-          <div
+          <GlassCard
             key={w._id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 flex flex-col justify-between hover:border-slate-300 transition-all"
+            title={
+              <div className="flex items-center gap-2">
+                <span className="mono-chip text-blue-400 font-bold">{w.code}</span>
+                <span>{w.name}</span>
+              </div>
+            }
+            subtitle={w.address?.city ? `${w.address.city}, ${w.address?.country || ''}` : 'Operational Hub'}
+            headerAction={
+              w.isDefault ? (
+                <span className="mono-chip text-[10px] text-emerald-400 font-bold">
+                  Primary Default
+                </span>
+              ) : (
+                <StatusPill status="ACTIVE" label="Active" />
+              )
+            }
           >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <WarehouseIcon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-base">{w.name}</h3>
-                    <span className="font-mono text-[11px] font-bold text-blue-600 uppercase">
-                      Code: {w.code}
-                    </span>
-                  </div>
+            <div className="space-y-3 pt-2 text-xs">
+              <div className="flex items-start gap-2.5 text-slate-300">
+                <MapPin className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                <span>
+                  {w.address?.street
+                    ? `${w.address.street}, ${w.address.city || ''} ${w.address.state || ''}`
+                    : 'Physical location address not registered'}
+                </span>
+              </div>
+
+              {w.contactPhone && (
+                <div className="flex items-center gap-2.5 text-slate-400">
+                  <Phone className="w-4 h-4 text-slate-500 shrink-0" />
+                  <span className="font-mono">{w.contactPhone}</span>
                 </div>
+              )}
 
-                {w.isDefault && (
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Default
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-1.5 text-xs text-slate-500 mt-4 border-t border-slate-100 pt-3">
-                {(w.address?.city || w.address?.street) && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>
-                      {[w.address.street, w.address.city, w.address.country].filter(Boolean).join(', ')}
-                    </span>
-                  </div>
-                )}
-                {w.contactPhone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{w.contactPhone}</span>
-                  </div>
-                )}
-                {w.contactEmail && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{w.contactEmail}</span>
-                  </div>
-                )}
-              </div>
+              {w.contactEmail && (
+                <div className="flex items-center gap-2.5 text-slate-400">
+                  <Mail className="w-4 h-4 text-slate-500 shrink-0" />
+                  <span className="font-mono">{w.contactEmail}</span>
+                </div>
+              )}
             </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span
-                className={`font-semibold ${
-                  w.status === 'ACTIVE' ? 'text-emerald-600' : 'text-slate-400'
-                }`}
-              >
-                ● {w.status}
-              </span>
-            </div>
-          </div>
+          </GlassCard>
         ))}
       </div>
 
-      {/* Add Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-              <h3 className="font-bold text-slate-900 text-base">Add New Warehouse</h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Add Warehouse Modal */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        maxWidth="max-w-lg"
+        title="Add Storage Facility"
+        subtitle="Define site code, dispatch priority, and logistics contact info"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setModalOpen(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCreateWarehouse}
+              loading={submitting}
+            >
+              Create Warehouse
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleCreateWarehouse} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Location Code"
+              required
+              placeholder="e.g. WH-MAIN"
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+            />
 
-            <form onSubmit={handleCreateWarehouse} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                    Warehouse Code *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="e.g. WH-NORTH"
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm uppercase font-mono focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. North Distribution Hub"
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-1">
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  value={formData.street}
-                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                  placeholder="Street / Facility Address"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="City"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                <input
-                  type="text"
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  placeholder="State/Prov"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                <input
-                  type="text"
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  placeholder="Country"
-                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="isDefault"
-                  checked={formData.isDefault}
-                  onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  className="rounded text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="isDefault" className="text-xs font-semibold text-slate-700">
-                  Set as Organization Default Warehouse
-                </label>
-              </div>
-
-              <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-sm shadow-blue-500/20 disabled:opacity-50"
-                >
-                  {submitting ? 'Saving...' : 'Save Warehouse'}
-                </button>
-              </div>
-            </form>
+            <Input
+              label="Facility Name"
+              required
+              placeholder="e.g. Central Distribution Hub"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
           </div>
-        </div>
-      )}
+
+          <Input
+            label="Street Address"
+            placeholder="e.g. 100 Logistics Blvd"
+            value={formData.street}
+            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Input
+              label="City"
+              placeholder="e.g. Seattle"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            />
+            <Input
+              label="State / Province"
+              placeholder="e.g. WA"
+              value={formData.state}
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            />
+            <Input
+              label="Country"
+              placeholder="e.g. USA"
+              value={formData.country}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Contact Phone"
+              placeholder="+1 (555) 000-0000"
+              value={formData.contactPhone}
+              onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+            />
+            <Input
+              label="Contact Email"
+              type="email"
+              placeholder="dock@facility.com"
+              value={formData.contactEmail}
+              onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+            />
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              id="isDefault"
+              checked={formData.isDefault}
+              onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+              className="rounded border-white/20 bg-slate-900 text-blue-500 focus:ring-0 cursor-pointer h-4 w-4"
+            />
+            <label htmlFor="isDefault" className="text-xs text-slate-300 font-medium cursor-pointer">
+              Set as primary default warehouse for automated order reservations
+            </label>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
-
