@@ -80,15 +80,6 @@ export default function Sidebar() {
       title: 'Analytics',
       items: [{ label: 'Valuation & Reports', path: '/reports', icon: BarChart3 }],
     },
-    {
-      title: 'Administration',
-      items: [
-        { label: 'Roles & Permissions', path: '/roles', icon: ShieldCheck },
-        { label: 'Team Members', path: '/team', icon: UserPlus },
-        { label: 'Workspace Settings', path: '/settings', icon: Settings },
-        { label: 'Audit Logs', path: '/audit', icon: History },
-      ],
-    },
   ];
 
   return (

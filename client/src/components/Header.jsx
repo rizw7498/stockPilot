@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../app/AuthContext';
+import { useTheme } from '../app/ThemeContext';
 import {
   Building2,
   Shield,
@@ -8,11 +9,14 @@ import {
   Command,
   ChevronDown,
   Settings,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import ProfileDrawer from './ProfileDrawer';
 
 export default function Header({ onOpenCommandPalette }) {
   const { user, activeOrganization, role, memberships, switchOrganization } = useAuth();
+  const { mode, toggleMode } = useTheme();
   const navigate = useNavigate();
 
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
@@ -114,8 +118,22 @@ export default function Header({ onOpenCommandPalette }) {
           </span>
         </div>
 
-        {/* Right: Settings & Profile (Logout removed from Navbar as requested) */}
+        {/* Right: Mode Toggle, Settings & Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Light / Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleMode}
+            title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className="p-2 rounded-lg glass-3 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all cursor-pointer flex items-center justify-center"
+          >
+            {mode === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-300" />
+            ) : (
+              <Moon className="w-4 h-4 text-indigo-400" />
+            )}
+          </button>
+
           {/* Settings Button: Redirects directly to /settings page as requested */}
           <button
             type="button"

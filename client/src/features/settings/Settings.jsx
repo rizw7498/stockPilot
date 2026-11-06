@@ -23,6 +23,8 @@ import {
   Shield,
   Boxes,
   FileSpreadsheet,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -31,7 +33,7 @@ import GlassCard from '../../components/ui/GlassCard';
 
 export default function Settings() {
   const { user, activeOrganization, role } = useAuth();
-  const { theme, setTheme, themes } = useTheme();
+  const { theme, setTheme, themes, mode, setMode } = useTheme();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -280,11 +282,83 @@ export default function Settings() {
               padding="p-6"
             >
               <div className="space-y-6">
+                {/* Mode Selector (Dark vs Light) */}
                 <div>
+                  <h4 className="text-[13px] font-semibold text-slate-100 mb-1">
+                    Interface Theme Mode
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-3">
+                    Choose between high-contrast dark atmosphere or modern daylight clean mode.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Dark Option */}
+                    <div
+                      onClick={() => setMode('dark')}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                        mode === 'dark'
+                          ? 'glass-2 border-white/30 bg-white/10 shadow-md'
+                          : 'glass-3 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-slate-900 border border-white/10 flex items-center justify-center text-indigo-400">
+                          <Moon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-[13px] font-semibold text-slate-100">
+                            Dark Mode
+                          </div>
+                          <div className="text-[11px] text-slate-400">
+                            Deep slate #070B14 base
+                          </div>
+                        </div>
+                      </div>
+
+                      {mode === 'dark' && (
+                        <span className="mono-chip text-[9px] text-emerald-400 flex items-center gap-1">
+                          <Check className="w-2.5 h-2.5" /> Selected
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Light Option */}
+                    <div
+                      onClick={() => setMode('light')}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                        mode === 'light'
+                          ? 'glass-2 border-white/30 bg-white/10 shadow-md'
+                          : 'glass-3 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-amber-500 shadow-xs">
+                          <Sun className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-[13px] font-semibold text-slate-100">
+                            Light Mode
+                          </div>
+                          <div className="text-[11px] text-slate-400">
+                            Clean daylight #F4F6FA base
+                          </div>
+                        </div>
+                      </div>
+
+                      {mode === 'light' && (
+                        <span className="mono-chip text-[9px] text-emerald-400 flex items-center gap-1">
+                          <Check className="w-2.5 h-2.5" /> Selected
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/5">
                   <h4 className="text-[13px] font-semibold text-slate-100 mb-1">
                     Select Accent Palette
                   </h4>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 mb-3">
                     Your selected color theme seamlessly adapts buttons, active navigation indicators, and soft background radial lights.
                   </p>
                 </div>

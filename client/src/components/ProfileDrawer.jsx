@@ -13,20 +13,15 @@ import {
   Key,
   ShieldCheck,
   Calendar,
-} from "lucide-react";
+  Sun,
+  Moon,
+} from 'lucide-react';
 import Drawer from "./ui/Drawer";
 import Button from "./ui/Button";
 
 export default function ProfileDrawer({ isOpen, onClose }) {
-  const {
-    user,
-    activeOrganization,
-    role,
-    memberships,
-    switchOrganization,
-    logout,
-  } = useAuth();
-  const { theme, setTheme, themes } = useTheme();
+  const { user, activeOrganization, role, memberships, switchOrganization, logout } = useAuth();
+  const { theme, setTheme, themes, mode, setMode } = useTheme();
 
   const userInitials = user?.name
     ? user.name
@@ -168,45 +163,74 @@ export default function ProfileDrawer({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Interface Color Themes */}
+        {/* Theme Mode & Color Accent */}
         <div className="space-y-2.5">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-1 flex items-center gap-1.5">
             <Palette className="w-3.5 h-3.5 text-slate-400" />
-            <span>Interface Accent Palette</span>
+            <span>Theme & Atmosphere</span>
           </div>
 
-          <div className="p-4 rounded-xl glass-3 border border-white/10 space-y-3">
-            <p className="text-xs text-slate-400">
-              Select your personalized atmosphere and highlight accent theme:
-            </p>
+          <div className="p-4 rounded-xl glass-3 border border-white/10 space-y-4">
+            {/* Dark / Light Mode Segment */}
+            <div>
+              <div className="text-xs text-slate-400 mb-2">Display Mode</div>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-black/20 border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setMode('dark')}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                    mode === 'dark'
+                      ? 'bg-white/15 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Dark Mode</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('light')}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                    mode === 'light'
+                      ? 'bg-white/15 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Sun className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Light Mode</span>
+                </button>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {themes.map((t) => {
-                const isSelected = theme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTheme(t.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
-                      isSelected
-                        ? "border-white/30 bg-white/10 text-white font-semibold shadow-xs"
-                        : "border-white/5 bg-white/[0.02] text-slate-300 hover:bg-white/5 hover:border-white/10"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs"
-                        style={{ backgroundColor: t.color }}
-                      />
-                      <span className="text-[12px]">{t.name}</span>
-                    </div>
-                    {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-slate-100" />
-                    )}
-                  </button>
-                );
-              })}
+            {/* Accent Color Swatches */}
+            <div>
+              <p className="text-xs text-slate-400 mb-2">Accent Palette</p>
+              <div className="grid grid-cols-2 gap-2">
+                {themes.map((t) => {
+                  const isSelected = theme === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTheme(t.id)}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-white/30 bg-white/10 text-white font-semibold shadow-xs'
+                          : 'border-white/5 bg-white/[0.02] text-slate-300 hover:bg-white/5 hover:border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs"
+                          style={{ backgroundColor: t.color }}
+                        />
+                        <span className="text-[12px]">{t.name}</span>
+                      </div>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-slate-100" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
