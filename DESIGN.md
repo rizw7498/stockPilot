@@ -89,5 +89,24 @@ background-image:
 | **`/team` (Team Members)** | Organization membership table with user initials, role badges, and invitation modal. |
 | **`/audit` (Audit Logs)** | Cryptographically clean system audit trail with timestamp, actor, action, and domain entity. |
 | **`/reports` (Valuation Reports)** | Total inventory valuation KPI cards and detailed FIFO position tables. |
+| **`/settings` (Workspace Settings)** | Two-column settings layout with configuration sidebar: General, Appearance & Themes (6 color swatches), Team, Roles, Warehouses, and Security & Audit. |
 | **`/login` & `/register` (Authentication)** | Atmospheric split-screen layout with 3 key architectural value props on the left and glass-overlay form on the right. |
+
+---
+
+## 5. Typography & Multi-Theme Architecture
+
+### Typography Stack
+- **Primary Interface**: **Poppins** (`300`, `400`, `500`, `600`, `700`) — Clean geometry, human warmth, and modern SaaS polish.
+- **Monospace Microchips**: **JetBrains Mono** — SKUs, order identifiers (`PO-`, `SO-`, `INV-`, `TRF-`, `RET-`), barcodes, and tabular numbers.
+
+### Color Theme Switcher (`ThemeContext.jsx`)
+StockPilot includes 6 enterprise color themes with dynamic focus rings, active sidebar items, button states, and radial atmosphere glow:
+- **`blue`** (Electric Blue — `#3B82F6`)
+- **`emerald`** (Emerald Mint — `#10B981`)
+- **`violet`** (Linear Violet — `#6366F1`)
+- **`amber`** (Industrial Amber — `#F59E0B`)
+- **`rose`** (Crimson Rose — `#F43F5E`)
+- **`cyan`** (Cyber Cyan — `#06B6D4`)
+
 
