@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema(
     barcode: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     name: {
       type: String,
@@ -26,13 +26,13 @@ const productSchema = new mongoose.Schema(
     },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
+      ref: "Category",
       default: null,
       index: true,
     },
     unit: {
       type: String,
-      default: 'pcs',
+      default: "pcs",
       trim: true,
     },
     // Amounts in minor units (e.g. cents/paisa) to avoid floating point issues
@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
       trim: true,
       uppercase: true,
     },
@@ -61,22 +61,22 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'ARCHIVED'],
-      default: 'ACTIVE',
+      enum: ["ACTIVE", "ARCHIVED"],
+      default: "ACTIVE",
       index: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 productSchema.index({ organizationId: 1, sku: 1 }, { unique: true });
 productSchema.index({ organizationId: 1, barcode: 1 }, { sparse: true });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = mongoose.model("Product", productSchema);

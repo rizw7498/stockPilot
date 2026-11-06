@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const stockAdjustmentLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   bookQty: {
@@ -24,7 +24,7 @@ const stockAdjustmentSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -35,14 +35,14 @@ const stockAdjustmentSchema = new mongoose.Schema(
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
       index: true,
     },
     status: {
       type: String,
-      enum: ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'],
-      default: 'DRAFT',
+      enum: ["DRAFT", "SUBMITTED", "APPROVED", "REJECTED"],
+      default: "DRAFT",
       index: true,
     },
     reason: {
@@ -53,12 +53,12 @@ const stockAdjustmentSchema = new mongoose.Schema(
     lines: [stockAdjustmentLineSchema],
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null,
     },
     approvedAt: {
@@ -68,9 +68,12 @@ const stockAdjustmentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-stockAdjustmentSchema.index({ organizationId: 1, adjustmentNumber: 1 }, { unique: true });
+stockAdjustmentSchema.index(
+  { organizationId: 1, adjustmentNumber: 1 },
+  { unique: true },
+);
 
-module.exports = mongoose.model('StockAdjustment', stockAdjustmentSchema);
+module.exports = mongoose.model("StockAdjustment", stockAdjustmentSchema);

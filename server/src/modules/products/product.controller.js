@@ -1,20 +1,26 @@
-const Product = require('./product.model');
-const InventoryBalance = require('../inventory/inventoryBalance.model');
-const StockMovement = require('../inventory/stockMovement.model');
-const Warehouse = require('../warehouses/warehouse.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ConflictError } = require('../../shared/errors');
-const { STOCK_MOVEMENT_TYPES } = require('../../shared/constants/statuses');
+const Product = require("./product.model");
+const InventoryBalance = require("../inventory/inventoryBalance.model");
+const StockMovement = require("../inventory/stockMovement.model");
+const Warehouse = require("../warehouses/warehouse.model");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ConflictError } = require("../../shared/errors");
+const { STOCK_MOVEMENT_TYPES } = require("../../shared/constants/statuses");
 
 const listProducts = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, search, categoryId, status = 'ACTIVE' } = req.query;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      categoryId,
+      status = "ACTIVE",
+    } = req.query;
 
     const query = {
       organizationId: req.organizationId,
     };
 
-    if (status && status !== 'ALL') {
+    if (status && status !== "ALL") {
       query.status = status;
     }
 
@@ -23,14 +29,14 @@ const listProducts = async (req, res, next) => {
     }
 
     if (search) {
-      const regex = new RegExp(search.trim(), 'i');
+      const regex = new RegExp(search.trim(), "i");
       query.$or = [{ name: regex }, { sku: regex }, { barcode: regex }];
     }
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [products, total] = await Promise.all([
       Product.find(query)
-        .populate('categoryId', 'name')
+        .populate("categoryId", "name")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -43,9 +49,9 @@ const listProducts = async (req, res, next) => {
       { $match: { productId: { $in: productIds } } },
       {
         $group: {
-          _id: '$productId',
-          totalOnHand: { $sum: '$onHand' },
-          totalReserved: { $sum: '$reserved' },
+          _id: "$productId",
+          totalOnHand: { $sum: "$onHand" },
+          totalReserved: { $sum: "$reserved" },
         },
       },
     ]);
@@ -61,7 +67,11 @@ const listProducts = async (req, res, next) => {
 
     const productsWithStock = products.map((p) => {
       const pObj = p.toObject();
-      const stock = balanceMap[p._id.toString()] || { onHand: 0, reserved: 0, available: 0 };
+      const stock = balanceMap[p._id.toString()] || {
+        onHand: 0,
+        reserved: 0,
+        available: 0,
+      };
       pObj.stock = stock;
       return pObj;
     });
@@ -82,10 +92,10 @@ const getProduct = async (req, res, next) => {
     const product = await Product.findOne({
       _id: req.params.id,
       organizationId: req.organizationId,
-    }).populate('categoryId', 'name');
+    }).populate("categoryId", "name");
 
     if (!product) {
-      throw new NotFoundError('Product not found');
+      throw new NotFoundError("Product not found");
     }
 
     return successResponse(res, product);
@@ -101,13 +111,13 @@ const getProductStock = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!product) {
-      throw new NotFoundError('Product not found');
+      throw new NotFoundError("Product not found");
     }
 
     const balances = await InventoryBalance.find({
       organizationId: req.organizationId,
       productId: product._id,
-    }).populate('warehouseId', 'name code isDefault');
+    }).populate("warehouseId", "name code isDefault");
 
     return successResponse(res, balances);
   } catch (error) {
@@ -142,14 +152,14 @@ const createProduct = async (req, res, next) => {
     const product = await Product.create({
       organizationId: req.organizationId,
       sku: sku.toUpperCase().trim(),
-      barcode: barcode ? barcode.trim() : '',
+      barcode: barcode ? barcode.trim() : "",
       name: name.trim(),
       categoryId: categoryId || null,
-      unit: unit || 'pcs',
+      unit: unit || "pcs",
       costMinor: costMinor !== undefined ? Math.round(costMinor) : 0,
       priceMinor: priceMinor !== undefined ? Math.round(priceMinor) : 0,
       reorderLevel: reorderLevel !== undefined ? reorderLevel : 10,
-      description: description || '',
+      description: description || "",
     });
 
     // If opening stock provided
@@ -180,10 +190,10 @@ const createProduct = async (req, res, next) => {
           quantity: initialStock,
           beforeOnHand: 0,
           afterOnHand: initialStock,
-          sourceType: 'OPENING_STOCK',
+          sourceType: "OPENING_STOCK",
           sourceId: product._id,
           actorId: req.user._id,
-          reason: 'Initial Opening Stock upon Product Creation',
+          reason: "Initial Opening Stock upon Product Creation",
         });
       }
     }
@@ -213,7 +223,7 @@ const updateProduct = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!product) {
-      throw new NotFoundError('Product not found');
+      throw new NotFoundError("Product not found");
     }
 
     if (name) product.name = name.trim();
@@ -240,13 +250,13 @@ const archiveProduct = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!product) {
-      throw new NotFoundError('Product not found');
+      throw new NotFoundError("Product not found");
     }
 
-    product.status = 'ARCHIVED';
+    product.status = "ARCHIVED";
     await product.save();
 
-    return successResponse(res, { message: 'Product archived successfully' });
+    return successResponse(res, { message: "Product archived successfully" });
   } catch (error) {
     next(error);
   }

@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const receiptLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   receivedQty: {
@@ -27,7 +27,7 @@ const purchaseReceiptSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -38,19 +38,19 @@ const purchaseReceiptSchema = new mongoose.Schema(
     },
     purchaseOrderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'PurchaseOrder',
+      ref: "PurchaseOrder",
       required: true,
       index: true,
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
     },
     lines: [receiptLineSchema],
     receivedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     receivedAt: {
@@ -59,15 +59,18 @@ const purchaseReceiptSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-purchaseReceiptSchema.index({ organizationId: 1, receiptNumber: 1 }, { unique: true });
+purchaseReceiptSchema.index(
+  { organizationId: 1, receiptNumber: 1 },
+  { unique: true },
+);
 
-module.exports = mongoose.model('PurchaseReceipt', purchaseReceiptSchema);
+module.exports = mongoose.model("PurchaseReceipt", purchaseReceiptSchema);

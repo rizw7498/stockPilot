@@ -1,9 +1,9 @@
-const Product = require('../products/product.model');
-const InventoryBalance = require('../inventory/inventoryBalance.model');
-const PurchaseOrder = require('../purchases/purchaseOrder.model');
-const SalesOrder = require('../sales/salesOrder.model');
-const Invoice = require('../invoices/invoice.model');
-const { successResponse } = require('../../shared/utils/response');
+const Product = require("../products/product.model");
+const InventoryBalance = require("../inventory/inventoryBalance.model");
+const PurchaseOrder = require("../purchases/purchaseOrder.model");
+const SalesOrder = require("../sales/salesOrder.model");
+const Invoice = require("../invoices/invoice.model");
+const { successResponse } = require("../../shared/utils/response");
 
 const getDashboardSummary = async (req, res, next) => {
   try {
@@ -17,28 +17,37 @@ const getDashboardSummary = async (req, res, next) => {
       allBalances,
       allProducts,
     ] = await Promise.all([
-      Product.countDocuments({ organizationId: orgId, status: 'ACTIVE' }),
+      Product.countDocuments({ organizationId: orgId, status: "ACTIVE" }),
       PurchaseOrder.countDocuments({
         organizationId: orgId,
-        status: { $in: ['DRAFT', 'SUBMITTED', 'ORDERED', 'PARTIALLY_RECEIVED'] },
+        status: {
+          $in: ["DRAFT", "SUBMITTED", "ORDERED", "PARTIALLY_RECEIVED"],
+        },
       }),
       SalesOrder.countDocuments({
         organizationId: orgId,
-        status: { $in: ['DRAFT', 'CONFIRMED', 'RESERVED', 'PARTIALLY_FULFILLED'] },
+        status: {
+          $in: ["DRAFT", "CONFIRMED", "RESERVED", "PARTIALLY_FULFILLED"],
+        },
       }),
       Invoice.aggregate([
-        { $match: { organizationId: orgId, status: { $in: ['ISSUED', 'PARTIALLY_PAID'] } } },
+        {
+          $match: {
+            organizationId: orgId,
+            status: { $in: ["ISSUED", "PARTIALLY_PAID"] },
+          },
+        },
         {
           $group: {
             _id: null,
-            totalDue: { $sum: '$balanceDueMinor' },
+            totalDue: { $sum: "$balanceDueMinor" },
             count: { $sum: 1 },
           },
         },
       ]),
       InventoryBalance.find({ organizationId: orgId }),
-      Product.find({ organizationId: orgId, status: 'ACTIVE' }).select(
-        '_id costMinor priceMinor reorderLevel name sku'
+      Product.find({ organizationId: orgId, status: "ACTIVE" }).select(
+        "_id costMinor priceMinor reorderLevel name sku",
       ),
     ]);
 
@@ -58,7 +67,11 @@ const getDashboardSummary = async (req, res, next) => {
         totalValuationMinor += (b.onHand || 0) * (prod.costMinor || 0);
 
         if (!productStockTotals[pId]) {
-          productStockTotals[pId] = { onHand: 0, reserved: 0, reorderLevel: prod.reorderLevel || 10 };
+          productStockTotals[pId] = {
+            onHand: 0,
+            reserved: 0,
+            reorderLevel: prod.reorderLevel || 10,
+          };
         }
         productStockTotals[pId].onHand += b.onHand || 0;
         productStockTotals[pId].reserved += b.reserved || 0;
@@ -75,7 +88,7 @@ const getDashboardSummary = async (req, res, next) => {
 
     // Recent 5 sales orders
     const recentOrders = await SalesOrder.find({ organizationId: orgId })
-      .populate('customerId', 'name')
+      .populate("customerId", "name")
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -100,8 +113,8 @@ const getStockValuationReport = async (req, res, next) => {
   try {
     const orgId = req.organizationId;
     const balances = await InventoryBalance.find({ organizationId: orgId })
-      .populate('productId', 'name sku unit costMinor priceMinor categoryId')
-      .populate('warehouseId', 'name code');
+      .populate("productId", "name sku unit costMinor priceMinor categoryId")
+      .populate("warehouseId", "name code");
 
     let totalValuationMinor = 0;
     let totalOnHandUnits = 0;

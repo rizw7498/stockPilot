@@ -1,4 +1,4 @@
-const { ValidationError } = require('../shared/errors');
+const { ValidationError } = require("../shared/errors");
 
 const validate = (schema) => (req, res, next) => {
   try {
@@ -15,10 +15,10 @@ const validate = (schema) => (req, res, next) => {
   } catch (error) {
     if (error.errors) {
       const details = error.errors.map((e) => ({
-        path: e.path.join('.'),
+        path: e.path.join("."),
         message: e.message,
       }));
-      return next(new ValidationError('Request validation failed', details));
+      return next(new ValidationError("Request validation failed", details));
     }
     return next(new ValidationError(error.message));
   }

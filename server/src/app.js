@@ -12,6 +12,7 @@ const { successResponse } = require('./shared/utils/response');
 // Import Module Routes
 const authRoutes = require('./modules/auth/auth.routes');
 const organizationRoutes = require('./modules/organizations/organization.routes');
+const roleRoutes = require('./modules/organizations/role.routes');
 const warehouseRoutes = require('./modules/warehouses/warehouse.routes');
 const categoryRoutes = require('./modules/categories/category.routes');
 const productRoutes = require('./modules/products/product.routes');
@@ -61,6 +62,7 @@ app.get('/api/v1/health', (req, res) => {
 // API Routes Mounting
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
+app.use('/api/v1/roles', roleRoutes);
 app.use('/api/v1/warehouses', warehouseRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/products', productRoutes);
@@ -86,3 +88,4 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 module.exports = app;
+

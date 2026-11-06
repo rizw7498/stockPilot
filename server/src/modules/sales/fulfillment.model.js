@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const fulfillmentLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   fulfilledQty: {
@@ -17,7 +17,7 @@ const fulfillmentSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -28,29 +28,29 @@ const fulfillmentSchema = new mongoose.Schema(
     },
     salesOrderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'SalesOrder',
+      ref: "SalesOrder",
       required: true,
       index: true,
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
     },
     lines: [fulfillmentLineSchema],
     carrier: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     trackingNumber: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     dispatchedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     dispatchedAt: {
@@ -60,9 +60,12 @@ const fulfillmentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-fulfillmentSchema.index({ organizationId: 1, fulfillmentNumber: 1 }, { unique: true });
+fulfillmentSchema.index(
+  { organizationId: 1, fulfillmentNumber: 1 },
+  { unique: true },
+);
 
-module.exports = mongoose.model('Fulfillment', fulfillmentSchema);
+module.exports = mongoose.model("Fulfillment", fulfillmentSchema);

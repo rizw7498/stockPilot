@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const warehouseController = require('./warehouse.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const warehouseController = require("./warehouse.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -30,18 +30,26 @@ const createWarehouseSchema = {
   }),
 };
 
-router.get('/', requirePermission(PERMISSIONS.WAREHOUSES_READ), warehouseController.listWarehouses);
-router.get('/:id', requirePermission(PERMISSIONS.WAREHOUSES_READ), warehouseController.getWarehouse);
+router.get(
+  "/",
+  requirePermission(PERMISSIONS.WAREHOUSES_READ),
+  warehouseController.listWarehouses,
+);
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.WAREHOUSES_READ),
+  warehouseController.getWarehouse,
+);
 router.post(
-  '/',
+  "/",
   requirePermission(PERMISSIONS.WAREHOUSES_CREATE),
   validate(createWarehouseSchema),
-  warehouseController.createWarehouse
+  warehouseController.createWarehouse,
 );
 router.patch(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.WAREHOUSES_UPDATE),
-  warehouseController.updateWarehouse
+  warehouseController.updateWarehouse,
 );
 
 module.exports = router;

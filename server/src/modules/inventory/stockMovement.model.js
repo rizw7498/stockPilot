@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
-const { STOCK_MOVEMENT_TYPES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { STOCK_MOVEMENT_TYPES } = require("../../shared/constants/statuses");
 
 const stockMovementSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
       index: true,
     },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
+      ref: "Product",
       required: true,
       index: true,
     },
@@ -55,12 +55,12 @@ const stockMovementSchema = new mongoose.Schema(
     },
     actorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null,
     },
     reason: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     occurredAt: {
@@ -71,10 +71,14 @@ const stockMovementSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 stockMovementSchema.index({ organizationId: 1, productId: 1, occurredAt: -1 });
-stockMovementSchema.index({ organizationId: 1, warehouseId: 1, occurredAt: -1 });
+stockMovementSchema.index({
+  organizationId: 1,
+  warehouseId: 1,
+  occurredAt: -1,
+});
 
-module.exports = mongoose.model('StockMovement', stockMovementSchema);
+module.exports = mongoose.model("StockMovement", stockMovementSchema);

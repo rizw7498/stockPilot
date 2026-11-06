@@ -1,10 +1,13 @@
-const Return = require('./return.model');
-const SalesOrder = require('../sales/salesOrder.model');
-const PurchaseOrder = require('../purchases/purchaseOrder.model');
-const inventoryService = require('../inventory/inventory.service');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError } = require('../../shared/errors');
-const { RETURN_STATUSES, RETURN_DISPOSITIONS } = require('../../shared/constants/statuses');
+const Return = require("./return.model");
+const SalesOrder = require("../sales/salesOrder.model");
+const PurchaseOrder = require("../purchases/purchaseOrder.model");
+const inventoryService = require("../inventory/inventory.service");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ValidationError } = require("../../shared/errors");
+const {
+  RETURN_STATUSES,
+  RETURN_DISPOSITIONS,
+} = require("../../shared/constants/statuses");
 
 const listReturns = async (req, res, next) => {
   try {
@@ -17,9 +20,9 @@ const listReturns = async (req, res, next) => {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [returns, total] = await Promise.all([
       Return.find(query)
-        .populate('warehouseId', 'name code')
-        .populate('lines.productId', 'name sku')
-        .populate('requestedBy', 'name email')
+        .populate("warehouseId", "name code")
+        .populate("lines.productId", "name sku")
+        .populate("requestedBy", "name email")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -43,11 +46,11 @@ const getReturn = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     })
-      .populate('warehouseId')
-      .populate('lines.productId')
-      .populate('requestedBy', 'name email');
+      .populate("warehouseId")
+      .populate("lines.productId")
+      .populate("requestedBy", "name email");
 
-    if (!ret) throw new NotFoundError('Return record not found');
+    if (!ret) throw new NotFoundError("Return record not found");
     return successResponse(res, ret);
   } catch (error) {
     next(error);
@@ -67,7 +70,7 @@ const createReturn = async (req, res, next) => {
     } = req.body;
 
     if (!lines || lines.length === 0) {
-      throw new ValidationError('Return lines must be provided');
+      throw new ValidationError("Return lines must be provided");
     }
 
     const returnNumber = `RET-${Date.now().toString().slice(-6)}`;
@@ -80,7 +83,7 @@ const createReturn = async (req, res, next) => {
       lines,
       disposition,
       status: RETURN_STATUSES.REQUESTED,
-      reason: reason || 'Customer return',
+      reason: reason || "Customer return",
       refundMinor: Math.round(refundMinor || 0),
       requestedBy: req.user._id,
     });
@@ -97,10 +100,10 @@ const approveReturn = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!ret) throw new NotFoundError('Return record not found');
+    if (!ret) throw new NotFoundError("Return record not found");
 
     if (ret.status !== RETURN_STATUSES.REQUESTED) {
-      throw new ValidationError('Only requested returns can be approved');
+      throw new ValidationError("Only requested returns can be approved");
     }
 
     ret.status = RETURN_STATUSES.APPROVED;
@@ -119,14 +122,14 @@ const completeReturn = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!ret) throw new NotFoundError('Return record not found');
+    if (!ret) throw new NotFoundError("Return record not found");
 
     if (ret.status === RETURN_STATUSES.COMPLETED) {
-      throw new ValidationError('This return has already been completed');
+      throw new ValidationError("This return has already been completed");
     }
 
     // Process physical stock changes based on disposition
-    if (ret.returnType === 'SALES_RETURN') {
+    if (ret.returnType === "SALES_RETURN") {
       if (ret.disposition === RETURN_DISPOSITIONS.RESTOCK) {
         // Increases onHand stock because returned product is restocked
         for (const line of ret.lines) {
@@ -135,7 +138,7 @@ const completeReturn = async (req, res, next) => {
             warehouseId: ret.warehouseId,
             productId: line.productId,
             quantity: line.returnedQty,
-            sourceType: 'SALES_RETURN',
+            sourceType: "SALES_RETURN",
             sourceId: ret._id,
             actorId: req.user._id,
             reason: `Restocked items from return ${ret.returnNumber}`,
@@ -143,7 +146,7 @@ const completeReturn = async (req, res, next) => {
         }
       }
       // If scrap or quarantine, sellable onHand is not increased per Section 7.5
-    } else if (ret.returnType === 'PURCHASE_RETURN') {
+    } else if (ret.returnType === "PURCHASE_RETURN") {
       // Dispatches goods back to supplier: decreases onHand stock
       for (const line of ret.lines) {
         await inventoryService.dispatchStock({
@@ -151,7 +154,7 @@ const completeReturn = async (req, res, next) => {
           warehouseId: ret.warehouseId,
           productId: line.productId,
           quantity: line.returnedQty,
-          sourceType: 'PURCHASE_RETURN',
+          sourceType: "PURCHASE_RETURN",
           sourceId: ret._id,
           actorId: req.user._id,
           reason: `Goods returned to supplier on ${ret.returnNumber}`,

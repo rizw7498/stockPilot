@@ -1,27 +1,31 @@
-const SalesOrder = require('./salesOrder.model');
-const Fulfillment = require('./fulfillment.model');
-const Customer = require('../customers/customer.model');
-const Product = require('../products/product.model');
-const Invoice = require('../invoices/invoice.model');
-const inventoryService = require('../inventory/inventory.service');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError, InsufficientStockError } = require('../../shared/errors');
-const { SALES_ORDER_STATUSES } = require('../../shared/constants/statuses');
+const SalesOrder = require("./salesOrder.model");
+const Fulfillment = require("./fulfillment.model");
+const Customer = require("../customers/customer.model");
+const Product = require("../products/product.model");
+const Invoice = require("../invoices/invoice.model");
+const inventoryService = require("../inventory/inventory.service");
+const { successResponse } = require("../../shared/utils/response");
+const {
+  NotFoundError,
+  ValidationError,
+  InsufficientStockError,
+} = require("../../shared/errors");
+const { SALES_ORDER_STATUSES } = require("../../shared/constants/statuses");
 
 const listSalesOrders = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, status, customerId } = req.query;
     const query = { organizationId: req.organizationId };
 
-    if (status && status !== 'ALL') query.status = status;
+    if (status && status !== "ALL") query.status = status;
     if (customerId) query.customerId = customerId;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [orders, total] = await Promise.all([
       SalesOrder.find(query)
-        .populate('customerId', 'name email phone')
-        .populate('warehouseId', 'name code')
-        .populate('lines.productId', 'name sku unit')
+        .populate("customerId", "name email phone")
+        .populate("warehouseId", "name code")
+        .populate("lines.productId", "name sku unit")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -45,18 +49,18 @@ const getSalesOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     })
-      .populate('customerId')
-      .populate('warehouseId')
-      .populate('lines.productId')
-      .populate('createdBy', 'name email');
+      .populate("customerId")
+      .populate("warehouseId")
+      .populate("lines.productId")
+      .populate("createdBy", "name email");
 
-    if (!order) throw new NotFoundError('Sales order not found');
+    if (!order) throw new NotFoundError("Sales order not found");
 
     const [fulfillments, invoice] = await Promise.all([
       Fulfillment.find({
         organizationId: req.organizationId,
         salesOrderId: order._id,
-      }).populate('dispatchedBy', 'name'),
+      }).populate("dispatchedBy", "name"),
       Invoice.findOne({
         organizationId: req.organizationId,
         salesOrderId: order._id,
@@ -71,16 +75,23 @@ const getSalesOrder = async (req, res, next) => {
 
 const createSalesOrder = async (req, res, next) => {
   try {
-    const { customerId, warehouseId, lines, taxMinor = 0, discountMinor = 0, notes } = req.body;
+    const {
+      customerId,
+      warehouseId,
+      lines,
+      taxMinor = 0,
+      discountMinor = 0,
+      notes,
+    } = req.body;
 
     const customer = await Customer.findOne({
       _id: customerId,
       organizationId: req.organizationId,
     });
-    if (!customer) throw new NotFoundError('Customer not found');
+    if (!customer) throw new NotFoundError("Customer not found");
 
     if (!lines || lines.length === 0) {
-      throw new ValidationError('At least one order line is required');
+      throw new ValidationError("At least one order line is required");
     }
 
     let subtotalMinor = 0;
@@ -91,10 +102,13 @@ const createSalesOrder = async (req, res, next) => {
         _id: line.productId,
         organizationId: req.organizationId,
       });
-      if (!product) throw new NotFoundError(`Product not found: ${line.productId}`);
+      if (!product)
+        throw new NotFoundError(`Product not found: ${line.productId}`);
 
       const unitPriceMinor =
-        line.unitPriceMinor !== undefined ? Math.round(line.unitPriceMinor) : product.priceMinor;
+        line.unitPriceMinor !== undefined
+          ? Math.round(line.unitPriceMinor)
+          : product.priceMinor;
       const totalMinor = unitPriceMinor * line.orderedQty;
       subtotalMinor += totalMinor;
 
@@ -108,7 +122,10 @@ const createSalesOrder = async (req, res, next) => {
       });
     }
 
-    const totalAmountMinor = Math.max(0, subtotalMinor + (taxMinor || 0) - (discountMinor || 0));
+    const totalAmountMinor = Math.max(
+      0,
+      subtotalMinor + (taxMinor || 0) - (discountMinor || 0),
+    );
     const orderNumber = `SO-${Date.now().toString().slice(-6)}`;
 
     const order = await SalesOrder.create({
@@ -122,7 +139,7 @@ const createSalesOrder = async (req, res, next) => {
       taxMinor,
       discountMinor,
       totalAmountMinor,
-      notes: notes || '',
+      notes: notes || "",
       createdBy: req.user._id,
     });
 
@@ -138,13 +155,15 @@ const confirmAndReserveOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!order) throw new NotFoundError('Sales order not found');
+    if (!order) throw new NotFoundError("Sales order not found");
 
     if (
       order.status !== SALES_ORDER_STATUSES.DRAFT &&
       order.status !== SALES_ORDER_STATUSES.CONFIRMED
     ) {
-      throw new ValidationError(`Order in state "${order.status}" cannot be confirmed/reserved`);
+      throw new ValidationError(
+        `Order in state "${order.status}" cannot be confirmed/reserved`,
+      );
     }
 
     // Attempt to reserve stock for each line
@@ -156,7 +175,7 @@ const confirmAndReserveOrder = async (req, res, next) => {
           warehouseId: order.warehouseId,
           productId: line.productId,
           quantity: neededReservation,
-          sourceType: 'SALES_ORDER',
+          sourceType: "SALES_ORDER",
           sourceId: order._id,
           actorId: req.user._id,
           reason: `Reservation for ${order.orderNumber}`,
@@ -181,29 +200,31 @@ const createFulfillment = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!order) throw new NotFoundError('Sales order not found');
+    if (!order) throw new NotFoundError("Sales order not found");
 
     if (
       order.status !== SALES_ORDER_STATUSES.RESERVED &&
       order.status !== SALES_ORDER_STATUSES.PARTIALLY_FULFILLED
     ) {
       throw new ValidationError(
-        `Cannot fulfill order in "${order.status}" status. Ensure order is confirmed and stock reserved.`
+        `Cannot fulfill order in "${order.status}" status. Ensure order is confirmed and stock reserved.`,
       );
     }
 
     if (!lines || lines.length === 0) {
-      throw new ValidationError('Fulfillment lines must be provided');
+      throw new ValidationError("Fulfillment lines must be provided");
     }
 
     const fulfillmentLines = [];
 
     for (const fLine of lines) {
       const soLine = order.lines.find(
-        (l) => l.productId.toString() === fLine.productId.toString()
+        (l) => l.productId.toString() === fLine.productId.toString(),
       );
       if (!soLine) {
-        throw new ValidationError(`Product ${fLine.productId} not found in this sales order`);
+        throw new ValidationError(
+          `Product ${fLine.productId} not found in this sales order`,
+        );
       }
 
       const remainingToFulfill = soLine.orderedQty - soLine.fulfilledQty;
@@ -213,7 +234,7 @@ const createFulfillment = async (req, res, next) => {
 
       if (fulfillQty > remainingToFulfill) {
         throw new ValidationError(
-          `Requested fulfillment (${fulfillQty}) exceeds remaining unfulfilled quantity (${remainingToFulfill})`
+          `Requested fulfillment (${fulfillQty}) exceeds remaining unfulfilled quantity (${remainingToFulfill})`,
         );
       }
 
@@ -223,7 +244,7 @@ const createFulfillment = async (req, res, next) => {
         warehouseId: order.warehouseId,
         productId: soLine.productId,
         quantity: fulfillQty,
-        sourceType: 'SALE_DISPATCH',
+        sourceType: "SALE_DISPATCH",
         sourceId: order._id,
         actorId: req.user._id,
         reason: `Dispatch for ${order.orderNumber}`,
@@ -238,7 +259,9 @@ const createFulfillment = async (req, res, next) => {
       });
     }
 
-    const allFulfilled = order.lines.every((l) => l.fulfilledQty >= l.orderedQty);
+    const allFulfilled = order.lines.every(
+      (l) => l.fulfilledQty >= l.orderedQty,
+    );
     order.status = allFulfilled
       ? SALES_ORDER_STATUSES.FULFILLED
       : SALES_ORDER_STATUSES.PARTIALLY_FULFILLED;
@@ -253,8 +276,8 @@ const createFulfillment = async (req, res, next) => {
       salesOrderId: order._id,
       warehouseId: order.warehouseId,
       lines: fulfillmentLines,
-      carrier: carrier || '',
-      trackingNumber: trackingNumber || '',
+      carrier: carrier || "",
+      trackingNumber: trackingNumber || "",
       dispatchedBy: req.user._id,
     });
 
@@ -270,14 +293,14 @@ const cancelSalesOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!order) throw new NotFoundError('Sales order not found');
+    if (!order) throw new NotFoundError("Sales order not found");
 
     if (
       order.status === SALES_ORDER_STATUSES.FULFILLED ||
       order.status === SALES_ORDER_STATUSES.PARTIALLY_FULFILLED
     ) {
       throw new ValidationError(
-        'Cannot cancel order with fulfilled items. Use returns/refunds workflow instead.'
+        "Cannot cancel order with fulfilled items. Use returns/refunds workflow instead.",
       );
     }
 
@@ -289,7 +312,7 @@ const cancelSalesOrder = async (req, res, next) => {
           warehouseId: order.warehouseId,
           productId: line.productId,
           quantity: line.reservedQty,
-          sourceType: 'ORDER_CANCEL',
+          sourceType: "ORDER_CANCEL",
           sourceId: order._id,
           actorId: req.user._id,
           reason: `Cancelled order ${order.orderNumber}`,

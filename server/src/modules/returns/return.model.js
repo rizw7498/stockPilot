@@ -1,10 +1,13 @@
-const mongoose = require('mongoose');
-const { RETURN_STATUSES, RETURN_DISPOSITIONS } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const {
+  RETURN_STATUSES,
+  RETURN_DISPOSITIONS,
+} = require("../../shared/constants/statuses");
 
 const returnLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   returnedQty: {
@@ -23,7 +26,7 @@ const returnSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -34,7 +37,7 @@ const returnSchema = new mongoose.Schema(
     },
     returnType: {
       type: String,
-      enum: ['SALES_RETURN', 'PURCHASE_RETURN'],
+      enum: ["SALES_RETURN", "PURCHASE_RETURN"],
       required: true,
     },
     sourceId: {
@@ -43,7 +46,7 @@ const returnSchema = new mongoose.Schema(
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
     },
     lines: [returnLineSchema],
@@ -70,12 +73,12 @@ const returnSchema = new mongoose.Schema(
     },
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null,
     },
     completedAt: {
@@ -85,9 +88,9 @@ const returnSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 returnSchema.index({ organizationId: 1, returnNumber: 1 }, { unique: true });
 
-module.exports = mongoose.model('Return', returnSchema);
+module.exports = mongoose.model("Return", returnSchema);

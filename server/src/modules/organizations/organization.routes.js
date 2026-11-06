@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const orgController = require('./organization.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const orgController = require("./organization.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -35,11 +35,29 @@ const inviteSchema = {
   }),
 };
 
-router.get('/current', orgController.getCurrentOrganization);
-router.patch('/current', requirePermission(PERMISSIONS.SETTINGS_UPDATE), validate(updateOrgSchema), orgController.updateOrganization);
-router.get('/members', requirePermission(PERMISSIONS.USERS_READ), orgController.listMembers);
-router.post('/invite', requirePermission(PERMISSIONS.USERS_INVITE), validate(inviteSchema), orgController.inviteMember);
-router.patch('/members/:memberId/role', requirePermission(PERMISSIONS.USERS_UPDATE), orgController.updateMemberRole);
-router.get('/roles', orgController.listRoles);
+router.get("/current", orgController.getCurrentOrganization);
+router.patch(
+  "/current",
+  requirePermission(PERMISSIONS.SETTINGS_UPDATE),
+  validate(updateOrgSchema),
+  orgController.updateOrganization,
+);
+router.get(
+  "/members",
+  requirePermission(PERMISSIONS.USERS_READ),
+  orgController.listMembers,
+);
+router.post(
+  "/invite",
+  requirePermission(PERMISSIONS.USERS_INVITE),
+  validate(inviteSchema),
+  orgController.inviteMember,
+);
+router.patch(
+  "/members/:memberId/role",
+  requirePermission(PERMISSIONS.USERS_UPDATE),
+  orgController.updateMemberRole,
+);
+router.get("/roles", orgController.listRoles);
 
 module.exports = router;

@@ -1,16 +1,20 @@
-const Organization = require('./organization.model');
-const Membership = require('./membership.model');
-const Role = require('./role.model');
-const User = require('../auth/user.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ConflictError, ValidationError } = require('../../shared/errors');
-const { v4: uuidv4 } = require('uuid');
+const Organization = require("./organization.model");
+const Membership = require("./membership.model");
+const Role = require("./role.model");
+const User = require("../auth/user.model");
+const { successResponse } = require("../../shared/utils/response");
+const {
+  NotFoundError,
+  ConflictError,
+  ValidationError,
+} = require("../../shared/errors");
+const { v4: uuidv4 } = require("uuid");
 
 const getCurrentOrganization = async (req, res, next) => {
   try {
     const org = await Organization.findById(req.organizationId);
     if (!org) {
-      throw new NotFoundError('Organization not found');
+      throw new NotFoundError("Organization not found");
     }
     return successResponse(res, org);
   } catch (error) {
@@ -23,7 +27,7 @@ const updateOrganization = async (req, res, next) => {
     const { name, currency, timezone, settings } = req.body;
     const org = await Organization.findById(req.organizationId);
     if (!org) {
-      throw new NotFoundError('Organization not found');
+      throw new NotFoundError("Organization not found");
     }
 
     if (name) org.name = name.trim();
@@ -42,9 +46,11 @@ const updateOrganization = async (req, res, next) => {
 
 const listMembers = async (req, res, next) => {
   try {
-    const members = await Membership.find({ organizationId: req.organizationId })
-      .populate('userId', 'name email status lastLoginAt')
-      .populate('roleId', 'name permissions isSystem')
+    const members = await Membership.find({
+      organizationId: req.organizationId,
+    })
+      .populate("userId", "name email status lastLoginAt")
+      .populate("roleId", "name permissions isSystem")
       .sort({ createdAt: -1 });
 
     return successResponse(res, members);
@@ -63,7 +69,7 @@ const inviteMember = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!role) {
-      throw new NotFoundError('Specified role not found for this organization');
+      throw new NotFoundError("Specified role not found for this organization");
     }
 
     let user = await User.findOne({ email: normalizedEmail });
@@ -71,10 +77,10 @@ const inviteMember = async (req, res, next) => {
       // Create user placeholder with random temporary password until acceptance
       const tempHash = await User.hashPassword(uuidv4());
       user = await User.create({
-        name: name || normalizedEmail.split('@')[0],
+        name: name || normalizedEmail.split("@")[0],
         email: normalizedEmail,
         passwordHash: tempHash,
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
@@ -84,7 +90,7 @@ const inviteMember = async (req, res, next) => {
     });
 
     if (existingMembership) {
-      throw new ConflictError('User is already a member of this organization');
+      throw new ConflictError("User is already a member of this organization");
     }
 
     const invitationToken = uuidv4();
@@ -95,7 +101,7 @@ const inviteMember = async (req, res, next) => {
       organizationId: req.organizationId,
       userId: user._id,
       roleId: role._id,
-      status: user.status === 'PENDING' ? 'INVITED' : 'ACTIVE',
+      status: user.status === "PENDING" ? "INVITED" : "ACTIVE",
       invitedBy: req.user._id,
       invitationToken,
       invitationExpiresAt: expiresAt,
@@ -107,7 +113,7 @@ const inviteMember = async (req, res, next) => {
         membership,
         invitationToken,
       },
-      201
+      201,
     );
   } catch (error) {
     next(error);
@@ -124,7 +130,7 @@ const updateMemberRole = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!role) {
-      throw new NotFoundError('Role not found');
+      throw new NotFoundError("Role not found");
     }
 
     const membership = await Membership.findOne({
@@ -132,7 +138,7 @@ const updateMemberRole = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!membership) {
-      throw new NotFoundError('Member record not found');
+      throw new NotFoundError("Member record not found");
     }
 
     membership.roleId = role._id;

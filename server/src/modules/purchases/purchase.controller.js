@@ -1,26 +1,26 @@
-const PurchaseOrder = require('./purchaseOrder.model');
-const PurchaseReceipt = require('./purchaseReceipt.model');
-const Supplier = require('../suppliers/supplier.model');
-const Product = require('../products/product.model');
-const inventoryService = require('../inventory/inventory.service');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError } = require('../../shared/errors');
-const { PURCHASE_ORDER_STATUSES } = require('../../shared/constants/statuses');
+const PurchaseOrder = require("./purchaseOrder.model");
+const PurchaseReceipt = require("./purchaseReceipt.model");
+const Supplier = require("../suppliers/supplier.model");
+const Product = require("../products/product.model");
+const inventoryService = require("../inventory/inventory.service");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ValidationError } = require("../../shared/errors");
+const { PURCHASE_ORDER_STATUSES } = require("../../shared/constants/statuses");
 
 const listPurchaseOrders = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, status, supplierId } = req.query;
     const query = { organizationId: req.organizationId };
 
-    if (status && status !== 'ALL') query.status = status;
+    if (status && status !== "ALL") query.status = status;
     if (supplierId) query.supplierId = supplierId;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [orders, total] = await Promise.all([
       PurchaseOrder.find(query)
-        .populate('supplierId', 'name companyName email')
-        .populate('warehouseId', 'name code')
-        .populate('lines.productId', 'name sku unit')
+        .populate("supplierId", "name companyName email")
+        .populate("warehouseId", "name code")
+        .populate("lines.productId", "name sku unit")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -44,17 +44,17 @@ const getPurchaseOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     })
-      .populate('supplierId')
-      .populate('warehouseId')
-      .populate('lines.productId')
-      .populate('createdBy', 'name email');
+      .populate("supplierId")
+      .populate("warehouseId")
+      .populate("lines.productId")
+      .populate("createdBy", "name email");
 
-    if (!order) throw new NotFoundError('Purchase order not found');
+    if (!order) throw new NotFoundError("Purchase order not found");
 
     const receipts = await PurchaseReceipt.find({
       organizationId: req.organizationId,
       purchaseOrderId: order._id,
-    }).populate('receivedBy', 'name');
+    }).populate("receivedBy", "name");
 
     return successResponse(res, { order, receipts });
   } catch (error) {
@@ -64,16 +64,17 @@ const getPurchaseOrder = async (req, res, next) => {
 
 const createPurchaseOrder = async (req, res, next) => {
   try {
-    const { supplierId, warehouseId, lines, expectedDeliveryDate, notes } = req.body;
+    const { supplierId, warehouseId, lines, expectedDeliveryDate, notes } =
+      req.body;
 
     const supplier = await Supplier.findOne({
       _id: supplierId,
       organizationId: req.organizationId,
     });
-    if (!supplier) throw new NotFoundError('Supplier not found');
+    if (!supplier) throw new NotFoundError("Supplier not found");
 
     if (!lines || lines.length === 0) {
-      throw new ValidationError('At least one order line is required');
+      throw new ValidationError("At least one order line is required");
     }
 
     let calculatedTotalMinor = 0;
@@ -84,10 +85,13 @@ const createPurchaseOrder = async (req, res, next) => {
         _id: line.productId,
         organizationId: req.organizationId,
       });
-      if (!product) throw new NotFoundError(`Product not found: ${line.productId}`);
+      if (!product)
+        throw new NotFoundError(`Product not found: ${line.productId}`);
 
       const unitCostMinor =
-        line.unitCostMinor !== undefined ? Math.round(line.unitCostMinor) : product.costMinor;
+        line.unitCostMinor !== undefined
+          ? Math.round(line.unitCostMinor)
+          : product.costMinor;
       const totalMinor = unitCostMinor * line.orderedQty;
       calculatedTotalMinor += totalMinor;
 
@@ -110,7 +114,7 @@ const createPurchaseOrder = async (req, res, next) => {
       lines: processedLines,
       totalAmountMinor: calculatedTotalMinor,
       expectedDeliveryDate: expectedDeliveryDate || null,
-      notes: notes || '',
+      notes: notes || "",
       createdBy: req.user._id,
     });
 
@@ -126,10 +130,10 @@ const submitPurchaseOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!po) throw new NotFoundError('Purchase order not found');
+    if (!po) throw new NotFoundError("Purchase order not found");
 
     if (po.status !== PURCHASE_ORDER_STATUSES.DRAFT) {
-      throw new ValidationError('Only draft orders can be submitted');
+      throw new ValidationError("Only draft orders can be submitted");
     }
 
     po.status = PURCHASE_ORDER_STATUSES.SUBMITTED;
@@ -147,13 +151,13 @@ const approvePurchaseOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!po) throw new NotFoundError('Purchase order not found');
+    if (!po) throw new NotFoundError("Purchase order not found");
 
     if (
       po.status !== PURCHASE_ORDER_STATUSES.SUBMITTED &&
       po.status !== PURCHASE_ORDER_STATUSES.DRAFT
     ) {
-      throw new ValidationError('Order cannot be approved in current state');
+      throw new ValidationError("Order cannot be approved in current state");
     }
 
     po.status = PURCHASE_ORDER_STATUSES.ORDERED;
@@ -173,29 +177,31 @@ const receiveGoods = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!po) throw new NotFoundError('Purchase order not found');
+    if (!po) throw new NotFoundError("Purchase order not found");
 
     if (
       po.status !== PURCHASE_ORDER_STATUSES.ORDERED &&
       po.status !== PURCHASE_ORDER_STATUSES.PARTIALLY_RECEIVED
     ) {
       throw new ValidationError(
-        `Cannot receive goods for purchase order with status "${po.status}"`
+        `Cannot receive goods for purchase order with status "${po.status}"`,
       );
     }
 
     if (!lines || lines.length === 0) {
-      throw new ValidationError('Receipt lines must be provided');
+      throw new ValidationError("Receipt lines must be provided");
     }
 
     const receiptLines = [];
 
     for (const rLine of lines) {
       const poLine = po.lines.find(
-        (l) => l.productId.toString() === rLine.productId.toString()
+        (l) => l.productId.toString() === rLine.productId.toString(),
       );
       if (!poLine) {
-        throw new ValidationError(`Product ${rLine.productId} not found in this purchase order`);
+        throw new ValidationError(
+          `Product ${rLine.productId} not found in this purchase order`,
+        );
       }
 
       const remainingQty = poLine.orderedQty - poLine.receivedQty;
@@ -205,7 +211,7 @@ const receiveGoods = async (req, res, next) => {
 
       if (receivedQty > remainingQty) {
         throw new ValidationError(
-          `Received quantity (${receivedQty}) exceeds remaining ordered quantity (${remainingQty}) for product ${poLine.productId}`
+          `Received quantity (${receivedQty}) exceeds remaining ordered quantity (${remainingQty}) for product ${poLine.productId}`,
         );
       }
 
@@ -216,7 +222,7 @@ const receiveGoods = async (req, res, next) => {
           warehouseId: po.warehouseId,
           productId: poLine.productId,
           quantity: acceptedQty,
-          sourceType: 'PURCHASE_RECEIPT',
+          sourceType: "PURCHASE_RECEIPT",
           sourceId: po._id,
           actorId: req.user._id,
           reason: `Goods receipt for ${po.poNumber}`,
@@ -250,19 +256,21 @@ const receiveGoods = async (req, res, next) => {
       warehouseId: po.warehouseId,
       lines: receiptLines,
       receivedBy: req.user._id,
-      notes: notes || '',
+      notes: notes || "",
     });
 
     // Update supplier outstanding balance
     const totalReceivedValue = receiptLines.reduce((acc, rl) => {
-      const poLine = po.lines.find((l) => l.productId.toString() === rl.productId.toString());
+      const poLine = po.lines.find(
+        (l) => l.productId.toString() === rl.productId.toString(),
+      );
       return acc + (poLine ? poLine.unitCostMinor * rl.acceptedQty : 0);
     }, 0);
 
     if (totalReceivedValue > 0) {
       await Supplier.updateOne(
         { _id: po.supplierId },
-        { $inc: { outstandingBalanceMinor: totalReceivedValue } }
+        { $inc: { outstandingBalanceMinor: totalReceivedValue } },
       );
     }
 
@@ -278,13 +286,15 @@ const cancelPurchaseOrder = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!po) throw new NotFoundError('Purchase order not found');
+    if (!po) throw new NotFoundError("Purchase order not found");
 
     if (
       po.status === PURCHASE_ORDER_STATUSES.RECEIVED ||
       po.status === PURCHASE_ORDER_STATUSES.PARTIALLY_RECEIVED
     ) {
-      throw new ValidationError('Cannot cancel purchase order that has already received stock');
+      throw new ValidationError(
+        "Cannot cancel purchase order that has already received stock",
+      );
     }
 
     po.status = PURCHASE_ORDER_STATUSES.CANCELLED;

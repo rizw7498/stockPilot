@@ -1,5 +1,5 @@
-const Notification = require('./notification.model');
-const { successResponse } = require('../../shared/utils/response');
+const Notification = require("./notification.model");
+const { successResponse } = require("../../shared/utils/response");
 
 const listNotifications = async (req, res, next) => {
   try {
@@ -9,7 +9,7 @@ const listNotifications = async (req, res, next) => {
       $or: [{ userId: req.user._id }, { userId: null }],
     };
 
-    if (unreadOnly === 'true') {
+    if (unreadOnly === "true") {
       query.readAt = null;
     }
 
@@ -31,7 +31,7 @@ const markAsRead = async (req, res, next) => {
         organizationId: req.organizationId,
       },
       { readAt: new Date() },
-      { new: true }
+      { new: true },
     );
 
     return successResponse(res, notification);

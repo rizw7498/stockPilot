@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const env = require('../../config/env');
+const jwt = require("jsonwebtoken");
+const env = require("../../config/env");
 
 const generateAccessToken = (payload) => {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
@@ -22,36 +22,36 @@ const verifyRefreshToken = (token) => {
 };
 
 const setAuthCookies = (res, accessToken, refreshToken) => {
-  const isProd = env.NODE_ENV === 'production';
+  const isProd = env.NODE_ENV === "production";
 
-  res.cookie('accessToken', accessToken, {
+  res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: isProd ? "none" : "lax",
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
   if (refreshToken) {
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      sameSite: isProd ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
 };
 
 const clearAuthCookies = (res) => {
-  const isProd = env.NODE_ENV === 'production';
-  res.clearCookie('accessToken', {
+  const isProd = env.NODE_ENV === "production";
+  res.clearCookie("accessToken", {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: isProd ? "none" : "lax",
   });
-  res.clearCookie('refreshToken', {
+  res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: isProd ? "none" : "lax",
   });
 };
 

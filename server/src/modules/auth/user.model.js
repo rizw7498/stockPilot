@@ -1,17 +1,17 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Name is required'],
+      required: [true, "Name is required"],
       trim: true,
       maxlength: 120,
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       trim: true,
       lowercase: true,
@@ -19,13 +19,13 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: {
       type: String,
-      required: [true, 'Password hash is required'],
+      required: [true, "Password hash is required"],
       select: false,
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'SUSPENDED', 'PENDING'],
-      default: 'ACTIVE',
+      enum: ["ACTIVE", "SUSPENDED", "PENDING"],
+      default: "ACTIVE",
       index: true,
     },
     lastLoginAt: {
@@ -34,13 +34,18 @@ const userSchema = new mongoose.Schema(
     },
     defaultOrganizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       default: null,
+    },
+    isSuperAdmin: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
@@ -52,4 +57,4 @@ userSchema.statics.hashPassword = async function (password) {
   return bcrypt.hash(password, salt);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

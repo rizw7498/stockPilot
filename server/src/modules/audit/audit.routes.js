@@ -12,3 +12,4 @@ router.use(authMiddleware, tenantMiddleware);
 router.get('/', requirePermission(PERMISSIONS.AUDIT_READ), auditController.listAuditLogs);
 
 module.exports = router;
+

@@ -1,10 +1,13 @@
-const Payment = require('./payment.model');
-const Invoice = require('../invoices/invoice.model');
-const Customer = require('../customers/customer.model');
-const Supplier = require('../suppliers/supplier.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError } = require('../../shared/errors');
-const { PAYMENT_STATUSES, INVOICE_STATUSES } = require('../../shared/constants/statuses');
+const Payment = require("./payment.model");
+const Invoice = require("../invoices/invoice.model");
+const Customer = require("../customers/customer.model");
+const Supplier = require("../suppliers/supplier.model");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ValidationError } = require("../../shared/errors");
+const {
+  PAYMENT_STATUSES,
+  INVOICE_STATUSES,
+} = require("../../shared/constants/statuses");
 
 const listPayments = async (req, res, next) => {
   try {
@@ -17,8 +20,8 @@ const listPayments = async (req, res, next) => {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [payments, total] = await Promise.all([
       Payment.find(query)
-        .populate('invoiceId', 'invoiceNumber totalAmountMinor')
-        .populate('recordedBy', 'name email')
+        .populate("invoiceId", "invoiceNumber totalAmountMinor")
+        .populate("recordedBy", "name email")
         .sort({ paymentDate: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -51,7 +54,7 @@ const recordPayment = async (req, res, next) => {
     } = req.body;
 
     if (amountMinor <= 0) {
-      throw new ValidationError('Payment amount must be positive');
+      throw new ValidationError("Payment amount must be positive");
     }
 
     let invoice = null;
@@ -60,30 +63,35 @@ const recordPayment = async (req, res, next) => {
         _id: invoiceId,
         organizationId: req.organizationId,
       });
-      if (!invoice) throw new NotFoundError('Invoice not found');
+      if (!invoice) throw new NotFoundError("Invoice not found");
 
       if (amountMinor > invoice.balanceDueMinor) {
         throw new ValidationError(
-          `Payment amount (${amountMinor}) exceeds invoice balance due (${invoice.balanceDueMinor})`
+          `Payment amount (${amountMinor}) exceeds invoice balance due (${invoice.balanceDueMinor})`,
         );
       }
 
       invoice.paidAmountMinor += amountMinor;
-      invoice.balanceDueMinor = Math.max(0, invoice.balanceDueMinor - amountMinor);
+      invoice.balanceDueMinor = Math.max(
+        0,
+        invoice.balanceDueMinor - amountMinor,
+      );
       invoice.status =
-        invoice.balanceDueMinor === 0 ? INVOICE_STATUSES.PAID : INVOICE_STATUSES.PARTIALLY_PAID;
+        invoice.balanceDueMinor === 0
+          ? INVOICE_STATUSES.PAID
+          : INVOICE_STATUSES.PARTIALLY_PAID;
       await invoice.save();
 
       // Reduce customer outstanding balance
       await Customer.updateOne(
         { _id: invoice.customerId },
-        { $inc: { outstandingBalanceMinor: -amountMinor } }
+        { $inc: { outstandingBalanceMinor: -amountMinor } },
       );
-    } else if (partyType === 'SUPPLIER' && partyId) {
+    } else if (partyType === "SUPPLIER" && partyId) {
       // Reduce supplier outstanding balance for outgoing payment
       await Supplier.updateOne(
         { _id: partyId },
-        { $inc: { outstandingBalanceMinor: -amountMinor } }
+        { $inc: { outstandingBalanceMinor: -amountMinor } },
       );
     }
 
@@ -91,15 +99,15 @@ const recordPayment = async (req, res, next) => {
     const payment = await Payment.create({
       organizationId: req.organizationId,
       paymentNumber,
-      direction: direction || 'INCOMING',
-      partyType: partyType || 'CUSTOMER',
+      direction: direction || "INCOMING",
+      partyType: partyType || "CUSTOMER",
       partyId,
       invoiceId: invoiceId || null,
       purchaseOrderId: purchaseOrderId || null,
       amountMinor: Math.round(amountMinor),
-      method: method || 'BANK_TRANSFER',
-      reference: reference || '',
-      notes: notes || '',
+      method: method || "BANK_TRANSFER",
+      reference: reference || "",
+      notes: notes || "",
       status: PAYMENT_STATUSES.SUCCEEDED,
       recordedBy: req.user._id,
     });

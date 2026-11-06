@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const { SALES_ORDER_STATUSES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { SALES_ORDER_STATUSES } = require("../../shared/constants/statuses");
 
 const soLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   orderedQty: {
@@ -38,7 +38,7 @@ const salesOrderSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -49,13 +49,13 @@ const salesOrderSchema = new mongoose.Schema(
     },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Customer',
+      ref: "Customer",
       required: true,
       index: true,
     },
     warehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
       index: true,
     },
@@ -90,7 +90,7 @@ const salesOrderSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
       trim: true,
       uppercase: true,
     },
@@ -100,20 +100,20 @@ const salesOrderSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 salesOrderSchema.index({ organizationId: 1, orderNumber: 1 }, { unique: true });
 
-module.exports = mongoose.model('SalesOrder', salesOrderSchema);
+module.exports = mongoose.model("SalesOrder", salesOrderSchema);

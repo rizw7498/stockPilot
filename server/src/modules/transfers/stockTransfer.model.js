@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const { TRANSFER_STATUSES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { TRANSFER_STATUSES } = require("../../shared/constants/statuses");
 
 const transferLineSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   requestedQty: {
@@ -28,7 +28,7 @@ const stockTransferSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -39,13 +39,13 @@ const stockTransferSchema = new mongoose.Schema(
     },
     fromWarehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
       index: true,
     },
     toWarehouseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Warehouse',
+      ref: "Warehouse",
       required: true,
       index: true,
     },
@@ -58,12 +58,12 @@ const stockTransferSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     dispatchedAt: {
@@ -77,9 +77,12 @@ const stockTransferSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-stockTransferSchema.index({ organizationId: 1, transferNumber: 1 }, { unique: true });
+stockTransferSchema.index(
+  { organizationId: 1, transferNumber: 1 },
+  { unique: true },
+);
 
-module.exports = mongoose.model('StockTransfer', stockTransferSchema);
+module.exports = mongoose.model("StockTransfer", stockTransferSchema);

@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const transferController = require('./transfer.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const transferController = require("./transfer.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -16,37 +16,47 @@ const createTransferSchema = {
     fromWarehouseId: z.string().min(1),
     toWarehouseId: z.string().min(1),
     notes: z.string().optional(),
-    lines: z.array(
-      z.object({
-        productId: z.string().min(1),
-        requestedQty: z.number().min(1),
-      })
-    ).min(1),
+    lines: z
+      .array(
+        z.object({
+          productId: z.string().min(1),
+          requestedQty: z.number().min(1),
+        }),
+      )
+      .min(1),
   }),
 };
 
-router.get('/', requirePermission(PERMISSIONS.INVENTORY_READ), transferController.listTransfers);
-router.get('/:id', requirePermission(PERMISSIONS.INVENTORY_READ), transferController.getTransfer);
+router.get(
+  "/",
+  requirePermission(PERMISSIONS.INVENTORY_READ),
+  transferController.listTransfers,
+);
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.INVENTORY_READ),
+  transferController.getTransfer,
+);
 router.post(
-  '/',
+  "/",
   requirePermission(PERMISSIONS.INVENTORY_TRANSFER),
   validate(createTransferSchema),
-  transferController.createTransfer
+  transferController.createTransfer,
 );
 router.post(
-  '/:id/approve',
+  "/:id/approve",
   requirePermission(PERMISSIONS.INVENTORY_TRANSFER),
-  transferController.approveTransfer
+  transferController.approveTransfer,
 );
 router.post(
-  '/:id/dispatch',
+  "/:id/dispatch",
   requirePermission(PERMISSIONS.INVENTORY_TRANSFER),
-  transferController.dispatchTransfer
+  transferController.dispatchTransfer,
 );
 router.post(
-  '/:id/receive',
+  "/:id/receive",
   requirePermission(PERMISSIONS.INVENTORY_TRANSFER),
-  transferController.receiveTransfer
+  transferController.receiveTransfer,
 );
 
 module.exports = router;

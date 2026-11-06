@@ -1,6 +1,6 @@
-const Warehouse = require('./warehouse.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ConflictError } = require('../../shared/errors');
+const Warehouse = require("./warehouse.model");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ConflictError } = require("../../shared/errors");
 
 const listWarehouses = async (req, res, next) => {
   try {
@@ -21,7 +21,7 @@ const getWarehouse = async (req, res, next) => {
       organizationId: req.organizationId,
     });
     if (!warehouse) {
-      throw new NotFoundError('Warehouse not found');
+      throw new NotFoundError("Warehouse not found");
     }
     return successResponse(res, warehouse);
   } catch (error) {
@@ -31,7 +31,8 @@ const getWarehouse = async (req, res, next) => {
 
 const createWarehouse = async (req, res, next) => {
   try {
-    const { code, name, address, contactPhone, contactEmail, isDefault } = req.body;
+    const { code, name, address, contactPhone, contactEmail, isDefault } =
+      req.body;
 
     const existingCode = await Warehouse.findOne({
       organizationId: req.organizationId,
@@ -44,7 +45,7 @@ const createWarehouse = async (req, res, next) => {
     if (isDefault) {
       await Warehouse.updateMany(
         { organizationId: req.organizationId },
-        { isDefault: false }
+        { isDefault: false },
       );
     }
 
@@ -53,8 +54,8 @@ const createWarehouse = async (req, res, next) => {
       code: code.toUpperCase().trim(),
       name: name.trim(),
       address: address || {},
-      contactPhone: contactPhone || '',
-      contactEmail: contactEmail || '',
+      contactPhone: contactPhone || "",
+      contactEmail: contactEmail || "",
       isDefault: !!isDefault,
     });
 
@@ -66,13 +67,14 @@ const createWarehouse = async (req, res, next) => {
 
 const updateWarehouse = async (req, res, next) => {
   try {
-    const { name, address, contactPhone, contactEmail, isDefault, status } = req.body;
+    const { name, address, contactPhone, contactEmail, isDefault, status } =
+      req.body;
     const warehouse = await Warehouse.findOne({
       _id: req.params.id,
       organizationId: req.organizationId,
     });
     if (!warehouse) {
-      throw new NotFoundError('Warehouse not found');
+      throw new NotFoundError("Warehouse not found");
     }
 
     if (name) warehouse.name = name.trim();
@@ -84,7 +86,7 @@ const updateWarehouse = async (req, res, next) => {
     if (isDefault && !warehouse.isDefault) {
       await Warehouse.updateMany(
         { organizationId: req.organizationId },
-        { isDefault: false }
+        { isDefault: false },
       );
       warehouse.isDefault = true;
     }

@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const supplierController = require('./supplier.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const supplierController = require("./supplier.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ const createSupplierSchema = {
   body: z.object({
     name: z.string().min(1),
     companyName: z.string().optional(),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.string().email().optional().or(z.literal("")),
     phone: z.string().optional(),
     address: z
       .object({
@@ -30,18 +30,26 @@ const createSupplierSchema = {
   }),
 };
 
-router.get('/', requirePermission(PERMISSIONS.SUPPLIERS_READ), supplierController.listSuppliers);
-router.get('/:id', requirePermission(PERMISSIONS.SUPPLIERS_READ), supplierController.getSupplier);
+router.get(
+  "/",
+  requirePermission(PERMISSIONS.SUPPLIERS_READ),
+  supplierController.listSuppliers,
+);
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.SUPPLIERS_READ),
+  supplierController.getSupplier,
+);
 router.post(
-  '/',
+  "/",
   requirePermission(PERMISSIONS.SUPPLIERS_CREATE),
   validate(createSupplierSchema),
-  supplierController.createSupplier
+  supplierController.createSupplier,
 );
 router.patch(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.SUPPLIERS_UPDATE),
-  supplierController.updateSupplier
+  supplierController.updateSupplier,
 );
 
 module.exports = router;

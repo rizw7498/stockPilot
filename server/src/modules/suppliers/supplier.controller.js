@@ -1,19 +1,24 @@
-const Supplier = require('./supplier.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError } = require('../../shared/errors');
+const Supplier = require("./supplier.model");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError } = require("../../shared/errors");
 
 const listSuppliers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, search, status = 'ACTIVE' } = req.query;
+    const { page = 1, limit = 20, search, status = "ACTIVE" } = req.query;
     const query = { organizationId: req.organizationId };
 
-    if (status && status !== 'ALL') {
+    if (status && status !== "ALL") {
       query.status = status;
     }
 
     if (search) {
-      const regex = new RegExp(search.trim(), 'i');
-      query.$or = [{ name: regex }, { companyName: regex }, { email: regex }, { phone: regex }];
+      const regex = new RegExp(search.trim(), "i");
+      query.$or = [
+        { name: regex },
+        { companyName: regex },
+        { email: regex },
+        { phone: regex },
+      ];
     }
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
@@ -42,7 +47,7 @@ const getSupplier = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!supplier) throw new NotFoundError('Supplier not found');
+    if (!supplier) throw new NotFoundError("Supplier not found");
     return successResponse(res, supplier);
   } catch (error) {
     next(error);
@@ -55,11 +60,11 @@ const createSupplier = async (req, res, next) => {
     const supplier = await Supplier.create({
       organizationId: req.organizationId,
       name: name.trim(),
-      companyName: companyName ? companyName.trim() : '',
-      email: email ? email.toLowerCase().trim() : '',
-      phone: phone ? phone.trim() : '',
+      companyName: companyName ? companyName.trim() : "",
+      email: email ? email.toLowerCase().trim() : "",
+      phone: phone ? phone.trim() : "",
       address: address || {},
-      paymentTerms: paymentTerms || 'NET_30',
+      paymentTerms: paymentTerms || "NET_30",
     });
     return successResponse(res, supplier, 201);
   } catch (error) {
@@ -73,9 +78,17 @@ const updateSupplier = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!supplier) throw new NotFoundError('Supplier not found');
+    if (!supplier) throw new NotFoundError("Supplier not found");
 
-    const fields = ['name', 'companyName', 'email', 'phone', 'address', 'paymentTerms', 'status'];
+    const fields = [
+      "name",
+      "companyName",
+      "email",
+      "phone",
+      "address",
+      "paymentTerms",
+      "status",
+    ];
     fields.forEach((field) => {
       if (req.body[field] !== undefined) {
         supplier[field] = req.body[field];

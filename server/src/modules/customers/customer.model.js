@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const customerSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -15,28 +15,28 @@ const customerSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
       lowercase: true,
     },
     phone: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     billingAddress: {
-      street: { type: String, default: '' },
-      city: { type: String, default: '' },
-      state: { type: String, default: '' },
-      zipCode: { type: String, default: '' },
-      country: { type: String, default: '' },
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      zipCode: { type: String, default: "" },
+      country: { type: String, default: "" },
     },
     shippingAddress: {
-      street: { type: String, default: '' },
-      city: { type: String, default: '' },
-      state: { type: String, default: '' },
-      zipCode: { type: String, default: '' },
-      country: { type: String, default: '' },
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      zipCode: { type: String, default: "" },
+      country: { type: String, default: "" },
     },
     creditLimitMinor: {
       type: Number,
@@ -49,16 +49,16 @@ const customerSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'INACTIVE'],
-      default: 'ACTIVE',
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
       index: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 customerSchema.index({ organizationId: 1, name: 1 });
 
-module.exports = mongoose.model('Customer', customerSchema);
+module.exports = mongoose.model("Customer", customerSchema);

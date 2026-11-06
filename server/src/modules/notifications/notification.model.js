@@ -1,23 +1,31 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null, // null means all org staff or targeted
       index: true,
     },
     type: {
       type: String,
       required: true,
-      enum: ['LOW_STOCK', 'PO_APPROVAL', 'GOODS_RECEIVED', 'SO_PENDING', 'SO_DISPATCHED', 'TRANSFER', 'ALERT'],
+      enum: [
+        "LOW_STOCK",
+        "PO_APPROVAL",
+        "GOODS_RECEIVED",
+        "SO_PENDING",
+        "SO_DISPATCHED",
+        "TRANSFER",
+        "ALERT",
+      ],
     },
     title: {
       type: String,
@@ -31,7 +39,7 @@ const notificationSchema = new mongoose.Schema(
     },
     entityType: {
       type: String,
-      default: '',
+      default: "",
     },
     entityId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -44,9 +52,9 @@ const notificationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 notificationSchema.index({ organizationId: 1, userId: 1, readAt: 1 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema);

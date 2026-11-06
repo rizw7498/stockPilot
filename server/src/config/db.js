@@ -25,3 +25,4 @@ mongoose.connection.on('reconnected', () => {
 });
 
 module.exports = connectDB;
+

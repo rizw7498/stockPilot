@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const { PAYMENT_STATUSES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { PAYMENT_STATUSES } = require("../../shared/constants/statuses");
 
 const paymentSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -16,12 +16,12 @@ const paymentSchema = new mongoose.Schema(
     },
     direction: {
       type: String,
-      enum: ['INCOMING', 'OUTGOING'],
+      enum: ["INCOMING", "OUTGOING"],
       required: true,
     },
     partyType: {
       type: String,
-      enum: ['CUSTOMER', 'SUPPLIER'],
+      enum: ["CUSTOMER", "SUPPLIER"],
       required: true,
     },
     partyId: {
@@ -31,13 +31,13 @@ const paymentSchema = new mongoose.Schema(
     },
     invoiceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Invoice',
+      ref: "Invoice",
       default: null,
       index: true,
     },
     purchaseOrderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'PurchaseOrder',
+      ref: "PurchaseOrder",
       default: null,
     },
     amountMinor: {
@@ -47,18 +47,18 @@ const paymentSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
       trim: true,
       uppercase: true,
     },
     method: {
       type: String,
-      enum: ['CASH', 'BANK_TRANSFER', 'CARD', 'ONLINE', 'CHECK'],
-      default: 'BANK_TRANSFER',
+      enum: ["CASH", "BANK_TRANSFER", "CARD", "ONLINE", "CHECK"],
+      default: "BANK_TRANSFER",
     },
     reference: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     status: {
@@ -73,20 +73,20 @@ const paymentSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     recordedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 paymentSchema.index({ organizationId: 1, paymentNumber: 1 }, { unique: true });
 
-module.exports = mongoose.model('Payment', paymentSchema);
+module.exports = mongoose.model("Payment", paymentSchema);

@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const productController = require('./product.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const productController = require("./product.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -27,24 +27,36 @@ const createProductSchema = {
   }),
 };
 
-router.get('/', requirePermission(PERMISSIONS.PRODUCTS_READ), productController.listProducts);
-router.get('/:id', requirePermission(PERMISSIONS.PRODUCTS_READ), productController.getProduct);
-router.get('/:id/stock', requirePermission(PERMISSIONS.PRODUCTS_READ), productController.getProductStock);
+router.get(
+  "/",
+  requirePermission(PERMISSIONS.PRODUCTS_READ),
+  productController.listProducts,
+);
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.PRODUCTS_READ),
+  productController.getProduct,
+);
+router.get(
+  "/:id/stock",
+  requirePermission(PERMISSIONS.PRODUCTS_READ),
+  productController.getProductStock,
+);
 router.post(
-  '/',
+  "/",
   requirePermission(PERMISSIONS.PRODUCTS_CREATE),
   validate(createProductSchema),
-  productController.createProduct
+  productController.createProduct,
 );
 router.patch(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.PRODUCTS_UPDATE),
-  productController.updateProduct
+  productController.updateProduct,
 );
 router.delete(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.PRODUCTS_DELETE),
-  productController.archiveProduct
+  productController.archiveProduct,
 );
 
 module.exports = router;

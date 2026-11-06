@@ -1,16 +1,24 @@
-const mongoose = require('mongoose');
-const InventoryBalance = require('./inventoryBalance.model');
-const StockMovement = require('./stockMovement.model');
-const Product = require('../products/product.model');
-const { InsufficientStockError, ValidationError } = require('../../shared/errors');
-const { STOCK_MOVEMENT_TYPES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const InventoryBalance = require("./inventoryBalance.model");
+const StockMovement = require("./stockMovement.model");
+const Product = require("../products/product.model");
+const {
+  InsufficientStockError,
+  ValidationError,
+} = require("../../shared/errors");
+const { STOCK_MOVEMENT_TYPES } = require("../../shared/constants/statuses");
 
 /**
  * Reusable inventory operations ensuring atomicity, validation, and ledger movement creation.
  */
 
 // Get or initialize an inventory balance record
-const getOrCreateBalance = async (organizationId, warehouseId, productId, session = null) => {
+const getOrCreateBalance = async (
+  organizationId,
+  warehouseId,
+  productId,
+  session = null,
+) => {
   let balance = await InventoryBalance.findOne({
     organizationId,
     warehouseId,
@@ -39,15 +47,20 @@ const receiveStock = async ({
   sourceType,
   sourceId,
   actorId,
-  reason = '',
+  reason = "",
   idempotencyKey = null,
   session = null,
 }) => {
   if (quantity <= 0) {
-    throw new ValidationError('Received quantity must be positive');
+    throw new ValidationError("Received quantity must be positive");
   }
 
-  const balance = await getOrCreateBalance(organizationId, warehouseId, productId, session);
+  const balance = await getOrCreateBalance(
+    organizationId,
+    warehouseId,
+    productId,
+    session,
+  );
   const beforeOnHand = balance.onHand;
   balance.onHand += quantity;
   await balance.save({ session });
@@ -69,7 +82,7 @@ const receiveStock = async ({
         idempotencyKey,
       },
     ],
-    { session }
+    { session },
   );
 
   return { balance, movement };
@@ -84,19 +97,24 @@ const reserveStock = async ({
   sourceType,
   sourceId,
   actorId,
-  reason = '',
+  reason = "",
   session = null,
 }) => {
   if (quantity <= 0) {
-    throw new ValidationError('Reservation quantity must be positive');
+    throw new ValidationError("Reservation quantity must be positive");
   }
 
-  const balance = await getOrCreateBalance(organizationId, warehouseId, productId, session);
+  const balance = await getOrCreateBalance(
+    organizationId,
+    warehouseId,
+    productId,
+    session,
+  );
   const available = balance.onHand - balance.reserved;
 
   if (available < quantity) {
     throw new InsufficientStockError(
-      `Insufficient available stock for product ${productId}. Available: ${available}, Requested: ${quantity}`
+      `Insufficient available stock for product ${productId}. Available: ${available}, Requested: ${quantity}`,
     );
   }
 
@@ -115,14 +133,19 @@ const releaseStock = async ({
   sourceType,
   sourceId,
   actorId,
-  reason = '',
+  reason = "",
   session = null,
 }) => {
   if (quantity <= 0) {
-    throw new ValidationError('Release quantity must be positive');
+    throw new ValidationError("Release quantity must be positive");
   }
 
-  const balance = await getOrCreateBalance(organizationId, warehouseId, productId, session);
+  const balance = await getOrCreateBalance(
+    organizationId,
+    warehouseId,
+    productId,
+    session,
+  );
   balance.reserved = Math.max(0, balance.reserved - quantity);
   await balance.save({ session });
 
@@ -138,19 +161,24 @@ const dispatchStock = async ({
   sourceType,
   sourceId,
   actorId,
-  reason = '',
+  reason = "",
   idempotencyKey = null,
   session = null,
 }) => {
   if (quantity <= 0) {
-    throw new ValidationError('Dispatched quantity must be positive');
+    throw new ValidationError("Dispatched quantity must be positive");
   }
 
-  const balance = await getOrCreateBalance(organizationId, warehouseId, productId, session);
+  const balance = await getOrCreateBalance(
+    organizationId,
+    warehouseId,
+    productId,
+    session,
+  );
 
   if (balance.onHand < quantity) {
     throw new InsufficientStockError(
-      `Cannot dispatch ${quantity} units: only ${balance.onHand} on hand`
+      `Cannot dispatch ${quantity} units: only ${balance.onHand} on hand`,
     );
   }
 
@@ -176,7 +204,7 @@ const dispatchStock = async ({
         idempotencyKey,
       },
     ],
-    { session }
+    { session },
   );
 
   return { balance, movement };
@@ -188,13 +216,18 @@ const adjustStock = async ({
   warehouseId,
   productId,
   countedQty,
-  sourceType = 'ADJUSTMENT',
+  sourceType = "ADJUSTMENT",
   sourceId = null,
   actorId,
-  reason = '',
+  reason = "",
   session = null,
 }) => {
-  const balance = await getOrCreateBalance(organizationId, warehouseId, productId, session);
+  const balance = await getOrCreateBalance(
+    organizationId,
+    warehouseId,
+    productId,
+    session,
+  );
   const beforeOnHand = balance.onHand;
   const varianceQty = countedQty - beforeOnHand;
 
@@ -217,7 +250,7 @@ const adjustStock = async ({
         reason,
       },
     ],
-    { session }
+    { session },
   );
 
   return { balance, movement, varianceQty };

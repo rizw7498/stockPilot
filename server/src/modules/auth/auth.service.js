@@ -7,6 +7,7 @@ const Warehouse = require('../warehouses/warehouse.model');
 const { ROLES, ROLE_PERMISSIONS_MAP, ALL_PERMISSIONS } = require('../../shared/constants/roles');
 const { ConflictError, UnauthorizedError, ValidationError, NotFoundError } = require('../../shared/errors');
 const { generateAccessToken, generateRefreshToken } = require('../../shared/utils/jwt');
+const { withTransaction } = require('../../shared/utils/transaction');
 
 const register = async ({ name, email, password, organizationName, currency = 'USD' }) => {
   const normalizedEmail = email.toLowerCase().trim();
@@ -15,18 +16,20 @@ const register = async ({ name, email, password, organizationName, currency = 'U
     throw new ConflictError('A user with this email address already exists');
   }
 
-  const slug = organizationName
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]/g, '-')
-    .replace(/-+/g, '-') + '-' + Math.random().toString(36).substring(2, 6);
+  const slug =
+    organizationName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-') +
+    '-' +
+    Math.random().toString(36).substring(2, 6);
 
   const passwordHash = await User.hashPassword(password);
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  return await withTransaction(async (session) => {
+    const opts = session ? { session } : {};
 
-  try {
     // 1. Create Organization
     const [organization] = await Organization.create(
       [
@@ -36,7 +39,7 @@ const register = async ({ name, email, password, organizationName, currency = 'U
           currency: currency.toUpperCase(),
         },
       ],
-      { session }
+      opts
     );
 
     // 2. Create User
@@ -49,7 +52,7 @@ const register = async ({ name, email, password, organizationName, currency = 'U
           defaultOrganizationId: organization._id,
         },
       ],
-      { session }
+      opts
     );
 
     // 3. Create Default Roles for this organization
@@ -85,7 +88,7 @@ const register = async ({ name, email, password, organizationName, currency = 'U
         isSystem: true,
       },
     ];
-    const createdRoles = await Role.create(rolesToCreate, { session });
+    const createdRoles = await Role.create(rolesToCreate, opts);
     const adminRole = createdRoles.find((r) => r.name === ROLES.ORG_ADMIN);
 
     // 4. Create Admin Membership
@@ -98,7 +101,7 @@ const register = async ({ name, email, password, organizationName, currency = 'U
           status: 'ACTIVE',
         },
       ],
-      { session }
+      opts
     );
 
     // 5. Create Default Warehouse
@@ -112,11 +115,8 @@ const register = async ({ name, email, password, organizationName, currency = 'U
           status: 'ACTIVE',
         },
       ],
-      { session }
+      opts
     );
-
-    await session.commitTransaction();
-    session.endSession();
 
     const tokenPayload = {
       userId: user._id.toString(),
@@ -148,11 +148,7 @@ const register = async ({ name, email, password, organizationName, currency = 'U
         refreshToken,
       },
     };
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
+  });
 };
 
 const login = async ({ email, password }) => {

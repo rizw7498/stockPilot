@@ -1,11 +1,11 @@
-const InventoryBalance = require('./inventoryBalance.model');
-const StockMovement = require('./stockMovement.model');
-const StockAdjustment = require('./stockAdjustment.model');
-const Product = require('../products/product.model');
-const inventoryService = require('./inventory.service');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError } = require('../../shared/errors');
-const { v4: uuidv4 } = require('uuid');
+const InventoryBalance = require("./inventoryBalance.model");
+const StockMovement = require("./stockMovement.model");
+const StockAdjustment = require("./stockAdjustment.model");
+const Product = require("../products/product.model");
+const inventoryService = require("./inventory.service");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError, ValidationError } = require("../../shared/errors");
+const { v4: uuidv4 } = require("uuid");
 
 const listInventory = async (req, res, next) => {
   try {
@@ -21,8 +21,11 @@ const listInventory = async (req, res, next) => {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [balances, total] = await Promise.all([
       InventoryBalance.find(query)
-        .populate('productId', 'name sku unit costMinor priceMinor reorderLevel')
-        .populate('warehouseId', 'name code')
+        .populate(
+          "productId",
+          "name sku unit costMinor priceMinor reorderLevel",
+        )
+        .populate("warehouseId", "name code")
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -55,9 +58,9 @@ const listLedger = async (req, res, next) => {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [movements, total] = await Promise.all([
       StockMovement.find(query)
-        .populate('productId', 'name sku unit')
-        .populate('warehouseId', 'name code')
-        .populate('actorId', 'name email')
+        .populate("productId", "name sku unit")
+        .populate("warehouseId", "name code")
+        .populate("actorId", "name email")
         .sort({ occurredAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -80,7 +83,7 @@ const createAdjustment = async (req, res, next) => {
     const { warehouseId, reason, lines } = req.body;
 
     if (!lines || !Array.isArray(lines) || lines.length === 0) {
-      throw new ValidationError('Adjustment lines must be provided');
+      throw new ValidationError("Adjustment lines must be provided");
     }
 
     const calculatedLines = await Promise.all(
@@ -88,7 +91,7 @@ const createAdjustment = async (req, res, next) => {
         const balance = await inventoryService.getOrCreateBalance(
           req.organizationId,
           warehouseId,
-          line.productId
+          line.productId,
         );
         const bookQty = balance.onHand;
         const varianceQty = line.countedQty - bookQty;
@@ -98,7 +101,7 @@ const createAdjustment = async (req, res, next) => {
           countedQty: line.countedQty,
           varianceQty,
         };
-      })
+      }),
     );
 
     const adjustmentNumber = `ADJ-${Date.now().toString().slice(-6)}`;
@@ -106,10 +109,10 @@ const createAdjustment = async (req, res, next) => {
       organizationId: req.organizationId,
       adjustmentNumber,
       warehouseId,
-      reason: reason || 'Physical Stock Count',
+      reason: reason || "Physical Stock Count",
       lines: calculatedLines,
       requestedBy: req.user._id,
-      status: 'SUBMITTED',
+      status: "SUBMITTED",
     });
 
     return successResponse(res, adjustment, 201);
@@ -126,11 +129,13 @@ const approveAdjustment = async (req, res, next) => {
     });
 
     if (!adjustment) {
-      throw new NotFoundError('Stock adjustment not found');
+      throw new NotFoundError("Stock adjustment not found");
     }
 
-    if (adjustment.status === 'APPROVED') {
-      throw new ValidationError('This adjustment has already been approved and posted');
+    if (adjustment.status === "APPROVED") {
+      throw new ValidationError(
+        "This adjustment has already been approved and posted",
+      );
     }
 
     for (const line of adjustment.lines) {
@@ -139,14 +144,14 @@ const approveAdjustment = async (req, res, next) => {
         warehouseId: adjustment.warehouseId,
         productId: line.productId,
         countedQty: line.countedQty,
-        sourceType: 'ADJUSTMENT',
+        sourceType: "ADJUSTMENT",
         sourceId: adjustment._id,
         actorId: req.user._id,
         reason: adjustment.reason,
       });
     }
 
-    adjustment.status = 'APPROVED';
+    adjustment.status = "APPROVED";
     adjustment.approvedBy = req.user._id;
     adjustment.approvedAt = new Date();
     await adjustment.save();
@@ -161,7 +166,7 @@ const listLowStock = async (req, res, next) => {
   try {
     const products = await Product.find({
       organizationId: req.organizationId,
-      status: 'ACTIVE',
+      status: "ACTIVE",
     });
 
     const lowStockItems = [];
@@ -170,10 +175,13 @@ const listLowStock = async (req, res, next) => {
       const balances = await InventoryBalance.find({
         organizationId: req.organizationId,
         productId: prod._id,
-      }).populate('warehouseId', 'name code');
+      }).populate("warehouseId", "name code");
 
       const totalOnHand = balances.reduce((acc, b) => acc + (b.onHand || 0), 0);
-      const totalReserved = balances.reduce((acc, b) => acc + (b.reserved || 0), 0);
+      const totalReserved = balances.reduce(
+        (acc, b) => acc + (b.reserved || 0),
+        0,
+      );
       const totalAvailable = Math.max(0, totalOnHand - totalReserved);
 
       if (totalAvailable <= (prod.reorderLevel || 10)) {
@@ -183,7 +191,10 @@ const listLowStock = async (req, res, next) => {
           totalReserved,
           totalAvailable,
           reorderLevel: prod.reorderLevel,
-          suggestedReorderQty: Math.max(0, (prod.reorderLevel || 10) * 2 - totalAvailable),
+          suggestedReorderQty: Math.max(
+            0,
+            (prod.reorderLevel || 10) * 2 - totalAvailable,
+          ),
           warehouseBreakdown: balances,
         });
       }

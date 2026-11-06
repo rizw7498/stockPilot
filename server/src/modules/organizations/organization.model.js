@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const organizationSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Organization name is required'],
+      required: [true, "Organization name is required"],
       trim: true,
       maxlength: 150,
     },
     slug: {
       type: String,
-      required: [true, 'Organization slug is required'],
+      required: [true, "Organization slug is required"],
       unique: true,
       lowercase: true,
       trim: true,
@@ -18,7 +18,7 @@ const organizationSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
       trim: true,
       uppercase: true,
       minlength: 3,
@@ -26,13 +26,13 @@ const organizationSchema = new mongoose.Schema(
     },
     timezone: {
       type: String,
-      default: 'UTC',
+      default: "UTC",
       trim: true,
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'SUSPENDED', 'TRIAL'],
-      default: 'ACTIVE',
+      enum: ["ACTIVE", "SUSPENDED", "TRIAL"],
+      default: "ACTIVE",
       index: true,
     },
     settings: {
@@ -43,7 +43,7 @@ const organizationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-module.exports = mongoose.model('Organization', organizationSchema);
+module.exports = mongoose.model("Organization", organizationSchema);

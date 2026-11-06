@@ -1,11 +1,11 @@
-const express = require('express');
-const { z } = require('zod');
-const categoryController = require('./category.controller');
-const authMiddleware = require('../../middleware/auth');
-const tenantMiddleware = require('../../middleware/tenant');
-const { requirePermission } = require('../../middleware/permissions');
-const { PERMISSIONS } = require('../../shared/constants/roles');
-const validate = require('../../middleware/validate');
+const express = require("express");
+const { z } = require("zod");
+const categoryController = require("./category.controller");
+const authMiddleware = require("../../middleware/auth");
+const tenantMiddleware = require("../../middleware/tenant");
+const { requirePermission } = require("../../middleware/permissions");
+const { PERMISSIONS } = require("../../shared/constants/roles");
+const validate = require("../../middleware/validate");
 
 const router = express.Router();
 
@@ -19,22 +19,26 @@ const createCategorySchema = {
   }),
 };
 
-router.get('/', requirePermission(PERMISSIONS.PRODUCTS_READ), categoryController.listCategories);
+router.get(
+  "/",
+  requirePermission(PERMISSIONS.PRODUCTS_READ),
+  categoryController.listCategories,
+);
 router.post(
-  '/',
+  "/",
   requirePermission(PERMISSIONS.PRODUCTS_CREATE),
   validate(createCategorySchema),
-  categoryController.createCategory
+  categoryController.createCategory,
 );
 router.patch(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.PRODUCTS_UPDATE),
-  categoryController.updateCategory
+  categoryController.updateCategory,
 );
 router.delete(
-  '/:id',
+  "/:id",
   requirePermission(PERMISSIONS.PRODUCTS_DELETE),
-  categoryController.deleteCategory
+  categoryController.deleteCategory,
 );
 
 module.exports = router;

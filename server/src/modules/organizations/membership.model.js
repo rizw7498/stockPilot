@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
-const { MEMBERSHIP_STATUSES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { MEMBERSHIP_STATUSES } = require("../../shared/constants/statuses");
 
 const membershipSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
       index: true,
     },
     roleId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Role',
+      ref: "Role",
       required: true,
     },
     status: {
@@ -28,7 +28,7 @@ const membershipSchema = new mongoose.Schema(
     },
     invitedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null,
     },
     invitationToken: {
@@ -43,9 +43,9 @@ const membershipSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 membershipSchema.index({ organizationId: 1, userId: 1 }, { unique: true });
 
-module.exports = mongoose.model('Membership', membershipSchema);
+module.exports = mongoose.model("Membership", membershipSchema);

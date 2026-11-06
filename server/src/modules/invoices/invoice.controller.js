@@ -1,24 +1,28 @@
-const Invoice = require('./invoice.model');
-const SalesOrder = require('../sales/salesOrder.model');
-const Customer = require('../customers/customer.model');
-const Payment = require('../payments/payment.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError, ValidationError, ConflictError } = require('../../shared/errors');
-const { INVOICE_STATUSES } = require('../../shared/constants/statuses');
+const Invoice = require("./invoice.model");
+const SalesOrder = require("../sales/salesOrder.model");
+const Customer = require("../customers/customer.model");
+const Payment = require("../payments/payment.model");
+const { successResponse } = require("../../shared/utils/response");
+const {
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+} = require("../../shared/errors");
+const { INVOICE_STATUSES } = require("../../shared/constants/statuses");
 
 const listInvoices = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, status, customerId } = req.query;
     const query = { organizationId: req.organizationId };
 
-    if (status && status !== 'ALL') query.status = status;
+    if (status && status !== "ALL") query.status = status;
     if (customerId) query.customerId = customerId;
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const [invoices, total] = await Promise.all([
       Invoice.find(query)
-        .populate('customerId', 'name email phone')
-        .populate('salesOrderId', 'orderNumber status')
+        .populate("customerId", "name email phone")
+        .populate("salesOrderId", "orderNumber status")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit, 10)),
@@ -42,15 +46,15 @@ const getInvoice = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     })
-      .populate('customerId')
-      .populate('salesOrderId');
+      .populate("customerId")
+      .populate("salesOrderId");
 
-    if (!invoice) throw new NotFoundError('Invoice not found');
+    if (!invoice) throw new NotFoundError("Invoice not found");
 
     const payments = await Payment.find({
       organizationId: req.organizationId,
       invoiceId: invoice._id,
-    }).populate('recordedBy', 'name');
+    }).populate("recordedBy", "name");
 
     return successResponse(res, { invoice, payments });
   } catch (error) {
@@ -65,9 +69,9 @@ const createInvoiceFromSalesOrder = async (req, res, next) => {
     const salesOrder = await SalesOrder.findOne({
       _id: salesOrderId,
       organizationId: req.organizationId,
-    }).populate('lines.productId');
+    }).populate("lines.productId");
 
-    if (!salesOrder) throw new NotFoundError('Sales order not found');
+    if (!salesOrder) throw new NotFoundError("Sales order not found");
 
     const existingInvoice = await Invoice.findOne({
       salesOrderId: salesOrder._id,
@@ -75,7 +79,7 @@ const createInvoiceFromSalesOrder = async (req, res, next) => {
     });
     if (existingInvoice) {
       throw new ConflictError(
-        `Invoice ${existingInvoice.invoiceNumber} has already been issued for this sales order`
+        `Invoice ${existingInvoice.invoiceNumber} has already been issued for this sales order`,
       );
     }
 
@@ -89,7 +93,9 @@ const createInvoiceFromSalesOrder = async (req, res, next) => {
       totalMinor: l.totalMinor,
     }));
 
-    const due = dueDate ? new Date(dueDate) : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const due = dueDate
+      ? new Date(dueDate)
+      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
 
     const invoice = await Invoice.create({
@@ -111,7 +117,7 @@ const createInvoiceFromSalesOrder = async (req, res, next) => {
     // Update customer outstanding balance
     await Customer.updateOne(
       { _id: salesOrder.customerId },
-      { $inc: { outstandingBalanceMinor: salesOrder.totalAmountMinor } }
+      { $inc: { outstandingBalanceMinor: salesOrder.totalAmountMinor } },
     );
 
     return successResponse(res, invoice, 201);

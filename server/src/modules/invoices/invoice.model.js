@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const { INVOICE_STATUSES } = require('../../shared/constants/statuses');
+const mongoose = require("mongoose");
+const { INVOICE_STATUSES } = require("../../shared/constants/statuses");
 
 const invoiceLineSnapshotSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   sku: { type: String, required: true },
@@ -18,7 +18,7 @@ const invoiceSchema = new mongoose.Schema(
   {
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Organization',
+      ref: "Organization",
       required: true,
       index: true,
     },
@@ -29,13 +29,13 @@ const invoiceSchema = new mongoose.Schema(
     },
     salesOrderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'SalesOrder',
+      ref: "SalesOrder",
       required: true,
       index: true,
     },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Customer',
+      ref: "Customer",
       required: true,
       index: true,
     },
@@ -70,7 +70,7 @@ const invoiceSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
       trim: true,
       uppercase: true,
     },
@@ -91,9 +91,9 @@ const invoiceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 invoiceSchema.index({ organizationId: 1, invoiceNumber: 1 }, { unique: true });
 
-module.exports = mongoose.model('Invoice', invoiceSchema);
+module.exports = mongoose.model("Invoice", invoiceSchema);

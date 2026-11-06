@@ -9,7 +9,14 @@ const successResponse = (res, data, statusCode = 200, meta = null) => {
   return res.status(statusCode).json(response);
 };
 
-const errorResponse = (res, statusCode, code, message, details = null, requestId = null) => {
+const errorResponse = (
+  res,
+  statusCode,
+  code,
+  message,
+  details = null,
+  requestId = null,
+) => {
   const response = {
     success: false,
     error: {

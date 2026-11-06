@@ -1,6 +1,6 @@
-const app = require('./app');
-const env = require('./config/env');
-const connectDB = require('./config/db');
+const app = require("./app");
+const env = require("./config/env");
+const connectDB = require("./config/db");
 
 const startServer = async () => {
   // Connect to MongoDB
@@ -16,15 +16,17 @@ const startServer = async () => {
   });
 
   const gracefulShutdown = (signal) => {
-    console.log(`[Process] Received ${signal}, closing HTTP server gracefully...`);
+    console.log(
+      `[Process] Received ${signal}, closing HTTP server gracefully...`,
+    );
     server.close(() => {
-      console.log('[Process] HTTP server closed.');
+      console.log("[Process] HTTP server closed.");
       process.exit(0);
     });
   };
 
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 };
 
 startServer();

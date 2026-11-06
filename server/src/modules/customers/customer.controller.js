@@ -1,18 +1,18 @@
-const Customer = require('./customer.model');
-const { successResponse } = require('../../shared/utils/response');
-const { NotFoundError } = require('../../shared/errors');
+const Customer = require("./customer.model");
+const { successResponse } = require("../../shared/utils/response");
+const { NotFoundError } = require("../../shared/errors");
 
 const listCustomers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, search, status = 'ACTIVE' } = req.query;
+    const { page = 1, limit = 20, search, status = "ACTIVE" } = req.query;
     const query = { organizationId: req.organizationId };
 
-    if (status && status !== 'ALL') {
+    if (status && status !== "ALL") {
       query.status = status;
     }
 
     if (search) {
-      const regex = new RegExp(search.trim(), 'i');
+      const regex = new RegExp(search.trim(), "i");
       query.$or = [{ name: regex }, { email: regex }, { phone: regex }];
     }
 
@@ -42,7 +42,7 @@ const getCustomer = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!customer) throw new NotFoundError('Customer not found');
+    if (!customer) throw new NotFoundError("Customer not found");
     return successResponse(res, customer);
   } catch (error) {
     next(error);
@@ -51,15 +51,23 @@ const getCustomer = async (req, res, next) => {
 
 const createCustomer = async (req, res, next) => {
   try {
-    const { name, email, phone, billingAddress, shippingAddress, creditLimitMinor } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      billingAddress,
+      shippingAddress,
+      creditLimitMinor,
+    } = req.body;
     const customer = await Customer.create({
       organizationId: req.organizationId,
       name: name.trim(),
-      email: email ? email.toLowerCase().trim() : '',
-      phone: phone ? phone.trim() : '',
+      email: email ? email.toLowerCase().trim() : "",
+      phone: phone ? phone.trim() : "",
       billingAddress: billingAddress || {},
       shippingAddress: shippingAddress || {},
-      creditLimitMinor: creditLimitMinor !== undefined ? Math.round(creditLimitMinor) : 0,
+      creditLimitMinor:
+        creditLimitMinor !== undefined ? Math.round(creditLimitMinor) : 0,
     });
     return successResponse(res, customer, 201);
   } catch (error) {
@@ -73,16 +81,16 @@ const updateCustomer = async (req, res, next) => {
       _id: req.params.id,
       organizationId: req.organizationId,
     });
-    if (!customer) throw new NotFoundError('Customer not found');
+    if (!customer) throw new NotFoundError("Customer not found");
 
     const fields = [
-      'name',
-      'email',
-      'phone',
-      'billingAddress',
-      'shippingAddress',
-      'creditLimitMinor',
-      'status',
+      "name",
+      "email",
+      "phone",
+      "billingAddress",
+      "shippingAddress",
+      "creditLimitMinor",
+      "status",
     ];
     fields.forEach((field) => {
       if (req.body[field] !== undefined) {

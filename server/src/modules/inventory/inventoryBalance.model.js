@@ -50,3 +50,4 @@ inventoryBalanceSchema.index(
 );
 
 module.exports = mongoose.model('InventoryBalance', inventoryBalanceSchema);
+

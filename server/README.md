@@ -108,3 +108,4 @@ npm run dev
 | **Reports** | `GET /reports/dashboard`<br>`GET /reports/stock-valuation` | Dashboard KPI metrics and valuation calculations |
 | **Audit Logs** | `GET /audit-logs` | Immutable audit trail |
 | **Notifications**| `GET /notifications`<br>`PATCH /notifications/:id/read` | Real-time workflow notifications |
+

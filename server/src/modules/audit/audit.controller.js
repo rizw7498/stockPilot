@@ -32,3 +32,4 @@ const listAuditLogs = async (req, res, next) => {
 module.exports = {
   listAuditLogs,
 };
+
