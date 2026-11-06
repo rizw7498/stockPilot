@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import { useToast } from '../../app/ToastContext';
-import { Layers, Plus, Trash2, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import api from "../../services/api";
+import { useToast } from "../../app/ToastContext";
+import { Layers, Plus, Trash2, X } from "lucide-react";
 
 export default function Categories() {
   const toast = useToast();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/categories');
+      const res = await api.get("/categories");
       if (res.success) setCategories(res.data);
     } catch (err) {
-      toast.error(err.message || 'Failed to load categories');
+      toast.error(err.message || "Failed to load categories");
     } finally {
       setLoading(false);
     }
@@ -32,14 +32,17 @@ export default function Categories() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post('/categories', { name: name.trim(), description: description.trim() });
+      await api.post("/categories", {
+        name: name.trim(),
+        description: description.trim(),
+      });
       toast.success(`Category "${name}" created!`);
       setModalOpen(false);
-      setName('');
-      setDescription('');
+      setName("");
+      setDescription("");
       fetchCategories();
     } catch (err) {
-      toast.error(err.message || 'Failed to create category');
+      toast.error(err.message || "Failed to create category");
     } finally {
       setSubmitting(false);
     }
@@ -49,10 +52,10 @@ export default function Categories() {
     if (!window.confirm(`Delete category "${catName}"?`)) return;
     try {
       await api.delete(`/categories/${id}`);
-      toast.success('Category deleted');
+      toast.success("Category deleted");
       fetchCategories();
     } catch (err) {
-      toast.error(err.message || 'Failed to delete category');
+      toast.error(err.message || "Failed to delete category");
     }
   };
 
@@ -60,9 +63,12 @@ export default function Categories() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Product Categories</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Product Categories
+          </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Group catalog products into logical hierarchies for reporting and filtering.
+            Group catalog products into logical hierarchies for reporting and
+            filtering.
           </p>
         </div>
 
@@ -99,13 +105,16 @@ export default function Categories() {
               </tr>
             ) : (
               categories.map((c) => (
-                <tr key={c._id} className="hover:bg-slate-50/70 transition-colors">
+                <tr
+                  key={c._id}
+                  className="hover:bg-slate-50/70 transition-colors"
+                >
                   <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
                     <Layers className="w-4 h-4 text-blue-600" />
                     {c.name}
                   </td>
                   <td className="py-3.5 px-4 text-xs text-slate-500">
-                    {c.description || 'No description'}
+                    {c.description || "No description"}
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     <button
@@ -126,8 +135,13 @@ export default function Categories() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
-              <h3 className="font-bold text-slate-900 text-base">New Category</h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
+              <h3 className="font-bold text-slate-900 text-base">
+                New Category
+              </h3>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -173,7 +187,7 @@ export default function Categories() {
                   disabled={submitting}
                   className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-sm shadow-blue-500/20 disabled:opacity-50"
                 >
-                  {submitting ? 'Creating...' : 'Create Category'}
+                  {submitting ? "Creating..." : "Create Category"}
                 </button>
               </div>
             </form>

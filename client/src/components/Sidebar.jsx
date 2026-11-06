@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -18,69 +18,67 @@ import {
   ChevronDown,
   Warehouse,
   ArrowLeftRight,
-} from 'lucide-react';
-import { useAuth } from '../app/AuthContext';
+} from "lucide-react";
+import { useAuth } from "../app/AuthContext";
 
 export default function Sidebar() {
   const { role, user } = useAuth();
-  const isSuperAdmin = user?.isSuperAdmin || role === 'Super Admin';
+  const isSuperAdmin = user?.isSuperAdmin || role === "Super Admin";
 
   const navGroups = [
     {
-      title: 'Overview',
+      title: "Overview",
+      items: [{ label: "Dashboard", path: "/", icon: LayoutDashboard }],
+    },
+    {
+      title: "Catalog",
       items: [
-        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { label: "Products", path: "/products", icon: Package },
+        { label: "Categories", path: "/categories", icon: Layers },
+        { label: "Warehouses", path: "/warehouses", icon: Warehouse },
       ],
     },
     {
-      title: 'Catalog',
+      title: "Inventory",
       items: [
-        { label: 'Products', path: '/products', icon: Package },
-        { label: 'Categories', path: '/categories', icon: Layers },
-        { label: 'Warehouses', path: '/warehouses', icon: Warehouse },
+        { label: "Stock Overview", path: "/inventory", icon: Boxes },
+        { label: "Stock Transfers", path: "/transfers", icon: ArrowLeftRight },
       ],
     },
     {
-      title: 'Inventory',
+      title: "Purchasing",
       items: [
-        { label: 'Stock Overview', path: '/inventory', icon: Boxes },
-        { label: 'Stock Transfers', path: '/transfers', icon: ArrowLeftRight },
+        { label: "Purchase Orders", path: "/purchases", icon: Truck },
+        { label: "Suppliers", path: "/suppliers", icon: Building2 },
       ],
     },
     {
-      title: 'Purchasing',
+      title: "Sales & Finance",
       items: [
-        { label: 'Purchase Orders', path: '/purchases', icon: Truck },
-        { label: 'Suppliers', path: '/suppliers', icon: Building2 },
+        { label: "Sales Orders", path: "/sales", icon: FileText },
+        { label: "Customers", path: "/customers", icon: Users },
+        { label: "Invoices", path: "/invoices", icon: FileText },
+        { label: "Payments", path: "/payments", icon: DollarSign },
       ],
     },
     {
-      title: 'Sales & Finance',
+      title: "Returns",
       items: [
-        { label: 'Sales Orders', path: '/sales', icon: FileText },
-        { label: 'Customers', path: '/customers', icon: Users },
-        { label: 'Invoices', path: '/invoices', icon: FileText },
-        { label: 'Payments', path: '/payments', icon: DollarSign },
+        { label: "Returns & Refunds", path: "/returns", icon: RotateCcw },
       ],
     },
     {
-      title: 'Returns',
+      title: "Analytics",
       items: [
-        { label: 'Returns & Refunds', path: '/returns', icon: RotateCcw },
+        { label: "Reports & Valuation", path: "/reports", icon: BarChart3 },
       ],
     },
     {
-      title: 'Analytics',
+      title: "Administration",
       items: [
-        { label: 'Reports & Valuation', path: '/reports', icon: BarChart3 },
-      ],
-    },
-    {
-      title: 'Administration',
-      items: [
-        { label: 'Roles & Permissions', path: '/roles', icon: ShieldCheck },
-        { label: 'Team Members', path: '/team', icon: UserPlus },
-        { label: 'Audit Logs', path: '/audit', icon: History },
+        { label: "Roles & Permissions", path: "/roles", icon: ShieldCheck },
+        { label: "Team Members", path: "/team", icon: UserPlus },
+        { label: "Audit Logs", path: "/audit", icon: History },
       ],
     },
   ];
@@ -93,9 +91,11 @@ export default function Sidebar() {
           SP
         </div>
         <div>
-          <span className="font-bold text-white text-base tracking-tight block">StockPilot</span>
+          <span className="font-bold text-white text-base tracking-tight block">
+            StockPilot
+          </span>
           <span className="text-[10px] uppercase font-semibold text-blue-400 tracking-wider">
-            {isSuperAdmin ? 'Super Admin' : 'SaaS Edition'}
+            {isSuperAdmin ? "Super Admin" : "SaaS Edition"}
           </span>
         </div>
       </div>
@@ -114,12 +114,12 @@ export default function Sidebar() {
                   <NavLink
                     key={iIdx}
                     to={item.path}
-                    end={item.path === '/'}
+                    end={item.path === "/"}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
                       }`
                     }
                   >
